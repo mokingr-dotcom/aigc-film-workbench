@@ -560,9 +560,11 @@
     elements.output.value = currentPrompt();
     elements.copy.textContent = state.copied ? "已复制" : "复制提示词";
     const missing = validationState();
-    elements.copy.disabled = missing.length > 0;
-    elements.validation.textContent = missing.length ? `还需完成：${missing.join("、")}` : "内容完整，可以复制生成。";
+    // 导演级优化：允许带病运行，不强制禁用复制按钮，仅做风险提示
+    elements.copy.disabled = false; 
+    elements.validation.textContent = missing.length ? `提示：建议补全 ${missing.join("、")} 以获得更稳定的生成效果。` : "内容完整，可以复制生成。";
     elements.validation.classList.toggle("ready", missing.length === 0);
+    elements.validation.classList.toggle("warning", missing.length > 0);
     renderCameraStage();
   }
 
@@ -667,20 +669,31 @@
     });
   });
 
-  elements.copy.addEventListener("click", async () => {
+  elements.copy.addEventListener("click", () => {
+    const text = currentPrompt();
+    elements.output.value = text;
     elements.output.focus();
     elements.output.select();
-    try {
-      await navigator.clipboard.writeText(currentPrompt());
-    } catch (error) {
-      document.execCommand("copy");
-    }
-    state.copied = true;
-    renderComposer();
-    setTimeout(() => {
-      state.copied = false;
+    
+    const performCopy = async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          throw new Error("Clipboard API unavailable");
+        }
+      } catch (error) {
+        document.execCommand("copy");
+      }
+      state.copied = true;
       renderComposer();
-    }, 1200);
+      setTimeout(() => {
+        state.copied = false;
+        renderComposer();
+      }, 1500);
+    };
+    
+    void performCopy();
   });
 
   elements.clear.addEventListener("click", resetComposer);

@@ -1181,9 +1181,11 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
       check.classList.toggle("ready", ready);
       check.classList.toggle("missing", !ready);
     });
-    elements.copy.disabled = missing.length > 0;
-    elements.validation.textContent = missing.length ? `还需完成 ${missing.length} 项角色身份信息${missing.includes("referenceAsset") ? "，并上传人物参考图" : ""}。` : "角色身份信息完整，可以复制或发送到其他工作台。";
+    // 导演级优化：解除强制禁用，允许导出草稿
+    elements.copy.disabled = false;
+    elements.validation.textContent = missing.length ? `提示：建议补全 ${missing.length} 项角色身份信息以锁定一致性。` : "角色身份信息完整，可以复制或发送到其他工作台。";
     elements.validation.classList.toggle("ready", missing.length === 0);
+    elements.validation.classList.toggle("warning", missing.length > 0);
     elements.saveVersion.disabled = missing.length > 0 || state.assetBusy || state.versionBusy;
     if (state.layout === "identity") {
       elements.filename.textContent = `${safeFilenamePart(elements.id.value, "CHAR-001")}_${safeFilenamePart(elements.role.value, "角色名")}_身份资料板_v001.png`;
@@ -1333,20 +1335,31 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
     });
   });
 
-  elements.copy.addEventListener("click", async () => {
+  elements.copy.addEventListener("click", () => {
+    const text = composePrompt();
+    elements.output.value = text;
     elements.output.focus();
     elements.output.select();
-    try {
-      await navigator.clipboard.writeText(composePrompt());
-    } catch (error) {
-      document.execCommand("copy");
-    }
-    state.copied = true;
-    render();
-    setTimeout(() => {
-      state.copied = false;
+    
+    const performCopy = async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          throw new Error("Clipboard API unavailable");
+        }
+      } catch (error) {
+        document.execCommand("copy");
+      }
+      state.copied = true;
       render();
-    }, 1200);
+      setTimeout(() => {
+        state.copied = false;
+        render();
+      }, 1500);
+    };
+    
+    void performCopy();
   });
 
   elements.clear.addEventListener("click", clearFields);
