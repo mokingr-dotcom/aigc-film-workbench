@@ -138,6 +138,43 @@
     });
   }
 
+  function syncToProject() {
+    const core = root.aigcWorkspaceCore;
+    if (!core || typeof core.patchProjectAssetLocks !== "function") {
+      alert("当前工作台未关联有效项目。");
+      return;
+    }
+    const project = core.getActiveProject();
+    if (!project) return;
+    const role = elements.role.value.trim();
+    if (!role) {
+      alert("请先填写角色姓名。");
+      return;
+    }
+
+    const asset = {
+      kind: "character",
+      id: elements.id.value.trim() || `CHAR-${Date.now().toString(36).toUpperCase()}`,
+      name: role,
+      detail: [elements.costume.value, elements.traits.value].filter(Boolean).join("；"),
+      referenceRule: "严格保持角色定妆母版的一致性",
+      masterStatus: "locked",
+      source: "角色定妆工作台同步",
+      referenceAssetIds: state.referenceAsset?.id ? [state.referenceAsset.id] : []
+    };
+
+    const nextLocks = [...(project.assetLocks || [])];
+    const existingIndex = nextLocks.findIndex((item) => item.kind === "character" && item.name === role);
+    if (existingIndex >= 0) {
+      nextLocks[existingIndex] = { ...nextLocks[existingIndex], ...asset };
+    } else {
+      nextLocks.push(asset);
+    }
+
+    core.patchProjectAssetLocks(nextLocks);
+    alert(`角色 “${role}” 已成功同步至项目资产库并锁定。`);
+  }
+
   function castingLayoutRules(layout, source, identityValues = {}, ratio = "16:9") {
     const normalizedLayout = normalizedCastingLayout(layout);
     const identityValue = (key, fallback) => {
@@ -599,6 +636,7 @@
     templatePurpose: document.querySelector("#casting-template-purpose"),
     templateComposition: document.querySelector("#casting-template-composition"),
     templateStage: document.querySelector("#casting-template-stage"),
+    syncProject: document.querySelector("#casting-sync-project"),
     templateStageLabel: document.querySelector("#casting-template-stage-label"),
     referenceLayer: document.querySelector("#casting-reference-layer"),
     identityImage: document.querySelector("#casting-identity-board-image"),
@@ -1312,6 +1350,7 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
   });
 
   elements.clear.addEventListener("click", clearFields);
+  elements.syncProject.addEventListener("click", syncToProject);
   elements.example.addEventListener("click", () => { void loadExample(); });
   elements.selectImage.addEventListener("click", () => { if (!state.assetBusy) elements.referenceFile.click(); });
   elements.replaceImage.addEventListener("click", () => { if (!state.assetBusy) elements.referenceFile.click(); });

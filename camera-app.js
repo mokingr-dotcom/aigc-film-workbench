@@ -48,6 +48,10 @@
     blockingMap: document.querySelector("#camera-blocking-map"),
     aspectButtons: [...document.querySelectorAll("[data-camera-aspect]")],
     saveVersion: document.querySelector("#camera-save-version"),
+    versionList: document.querySelector("#camera-version-list"),
+    versionCount: document.querySelector("#camera-version-count"),
+    versionEmpty: document.querySelector("#camera-version-empty"),
+    versionsPanel: document.querySelector("#camera-versions-panel"),
     structureModes: [...document.querySelectorAll("[data-camera-structure]")],
     durationModes: [...document.querySelectorAll("[data-camera-duration]")],
     shortStructure: document.querySelector("#camera-15s-structure"),
@@ -174,6 +178,74 @@
 
   function searchableText(item) {
     return normalize(Object.values(item).flat().join(" "));
+  }
+
+  function nextVersionNumber() {
+    return Math.max(0, ...state.versions.map((v) => v.number || 0)) + 1;
+  }
+
+  function renderVersions() {
+    if (!elements.versionList) return;
+    const versions = state.versions || [];
+    elements.versionCount.textContent = `${versions.length} / 12`;
+    elements.versionEmpty.hidden = versions.length > 0;
+    elements.versionsPanel.hidden = versions.length === 0;
+
+    elements.versionList.replaceChildren(...versions.map((version) => {
+      const card = document.createElement("article");
+      card.className = "camera-version-card";
+      card.innerHTML = `
+        <header>
+          <strong>方案 V${version.number}</strong>
+          <time>${new Date(version.createdAt).toLocaleDateString("zh-CN")}</time>
+        </header>
+        <p>${escapeHtml(version.scene || "未命名场景")}</p>
+        <footer>
+          <small>${version.duration}s · ${version.aspect === "cinema" ? "21:9" : "16:9"}</small>
+          <button type="button" data-camera-restore="${version.id}">恢复</button>
+        </footer>
+      `;
+      return card;
+    }));
+  }
+
+  function saveVersion() {
+    const number = nextVersionNumber();
+    const version = {
+      id: `camera-v-${Date.now()}`,
+      number,
+      createdAt: new Date().toISOString(),
+      character: elements.character.value,
+      scene: elements.scene.value,
+      look: elements.look.value,
+      performance: elements.performance.value,
+      action: elements.action.value,
+      sound: elements.sound.value,
+      ending: elements.ending.value,
+      duration: state.duration,
+      aspect: state.aspect,
+      mode: state.mode
+    };
+    state.versions = [version, ...state.versions].slice(0, 12);
+    renderVersions();
+    root.aigcWorkspaceCore?.persistNow?.();
+  }
+
+  function restoreVersion(id) {
+    const version = state.versions.find((v) => v.id === id);
+    if (!version) return;
+    elements.character.value = version.character || "";
+    elements.scene.value = version.scene || "";
+    elements.look.value = version.look || "";
+    elements.performance.value = version.performance || "";
+    elements.action.value = version.action || "";
+    elements.sound.value = version.sound || "";
+    elements.ending.value = version.ending || "";
+    state.duration = version.duration || 15;
+    state.aspect = version.aspect || "cinema";
+    state.mode = version.mode || "quick";
+    renderComposer();
+    root.aigcWorkspaceCore?.persistNow?.();
   }
 
   function groups() {
@@ -619,15 +691,14 @@
   });
 
   elements.saveVersion.addEventListener("click", () => {
-    if (!state.selected) return;
-    state.versions.push({
-      number: state.versions.length + 1,
-      createdAt: new Date().toISOString(),
-      selected: { source: state.selected.source, id: state.selected.id },
-      prompt: currentPrompt()
-    });
-    state.versions = state.versions.slice(-20);
-    renderCameraStage();
+    saveVersion();
+    state.copied = false;
+    renderComposer();
+  });
+
+  elements.versionList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-camera-restore]");
+    if (button) restoreVersion(button.dataset.cameraRestore);
   });
 
   root.aigcCameraWorkbench = {

@@ -1167,3 +1167,110 @@ body.camera-column-resizing * {
     min-height: 50px;
   }
 }
+
+/* Camera Versioning UI */
+.camera-versions-panel {
+  margin: 12px;
+  padding: 12px;
+  background: var(--camera-panel);
+  border: 1px solid var(--camera-line);
+  border-radius: 6px;
+}
+
+.camera-versions-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.camera-versions-panel h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 680;
+  color: var(--camera-ink);
+}
+
+#camera-version-count {
+  font-size: 11px;
+  color: var(--camera-muted);
+}
+
+.camera-version-list {
+  display: grid;
+  gap: 8px;
+}
+
+.camera-version-card {
+  padding: 10px;
+  background: #fbfbf8;
+  border: 1px solid var(--camera-line-soft);
+  border-radius: 4px;
+  transition: all 140ms ease;
+}
+
+.camera-version-card:hover {
+  border-color: var(--camera-petrol);
+  background: var(--camera-petrol-soft);
+}
+
+.camera-version-card header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.camera-version-card strong {
+  font-size: 12px;
+  color: var(--camera-ink);
+}
+
+.camera-version-card time {
+  font-size: 10px;
+  color: var(--camera-muted);
+}
+
+.camera-version-card p {
+  margin: 0 0 8px;
+  font-size: 11px;
+  color: var(--camera-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.camera-version-card footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.camera-version-card small {
+  font-size: 10px;
+  color: var(--camera-petrol);
+  font-weight: 600;
+}
+
+.camera-version-card button {
+  padding: 2px 8px;
+  font-size: 10px;
+  background: var(--camera-panel);
+  border: 1px solid var(--camera-line);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.camera-version-card button:hover {
+  background: var(--camera-petrol);
+  color: white;
+  border-color: var(--camera-petrol);
+}
+
+.empty-text {
+  text-align: center;
+  padding: 20px;
+  color: var(--camera-muted);
+  font-size: 11px;
+  font-style: italic;
+}

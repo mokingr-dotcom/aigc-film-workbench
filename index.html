@@ -599,7 +599,7 @@
         </div>
 
         <footer class="casting-inspector-footer">
-          <div class="casting-primary-actions"><button id="casting-clear" type="button" class="button secondary">清空</button><button id="casting-copy" type="button" class="button primary">复制提示词</button></div>
+          <div class="casting-primary-actions"><button id="casting-clear" type="button" class="button secondary">清空</button><button id="casting-copy" type="button" class="button primary">复制提示词</button><button id="casting-sync-project" type="button" class="button secondary" title="将当前角色定妆结果同步至项目资产库">同步至项目</button></div>
           <div class="transfer-row" aria-label="发送当前角色"><button id="casting-send-camera" type="button" class="button secondary"><i data-lucide="video" aria-hidden="true"></i>到运镜</button><button id="casting-send-poster" type="button" class="button secondary"><i data-lucide="panels-top-left" aria-hidden="true"></i>到海报生图</button></div>
         </footer>
       </section>
@@ -1229,6 +1229,16 @@
             </button>
           </div>
         </header>
+
+        <section id="camera-versions-panel" class="camera-versions-panel" aria-label="镜头版本库" hidden>
+          <header>
+            <h3>镜头方案版本</h3>
+            <span id="camera-version-count">0 / 12</span>
+          </header>
+          <div id="camera-version-list" class="camera-version-list">
+            <p id="camera-version-empty" class="empty-text">尚未保存任何版本</p>
+          </div>
+        </section>
 
         <figure id="camera-monitor" class="camera-monitor">
           <img id="camera-monitor-image" src="assets/tone-option2-hero.png" alt="当前运镜电影监看画面">

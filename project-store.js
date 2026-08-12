@@ -249,13 +249,31 @@
     return lines.map((line, index) => {
       const isEstablishing = index === 0;
       const isFinal = index === lines.length - 1;
+
+      // 导演级关键词识别
+      const isCloseUp = /看|望|眼|脸|表情|泪|笑|惊|怒|意识到/.test(line);
+      const isAction = /走|跑|跳|打|推|拉|夺|拿|放|离开|进入/.test(line);
+      const isTense = /急|快|危险|逼近|屏息|颤抖/.test(line);
+
+      let framing = isEstablishing ? "中景，先建立人物与空间关系" : "中近景，清楚捕捉关键动作与情绪";
+      if (isCloseUp) framing = "特写或近景，聚焦人物眼神与面部微表情";
+      if (isAction && !isEstablishing) framing = "中景或全景，完整捕捉肢体动作与空间关系";
+
+      let movement = isEstablishing ? "稳定观察，动作开始后再有动机地推进" : isFinal ? "克制推进，停在信息或情绪落点" : "跟随人物动作，保持空间方向连续";
+      if (isTense) movement = "手持感晃动或快速推进，增加临场压力";
+      if (isAction && !isTense) movement = "横移跟随或环绕，保持动感与主体完整";
+
+      let performance = "自然呼吸、视线和微小身体反应，避免夸张表演。";
+      if (isTense) performance = "呼吸急促，眼神不时游移，身体紧绷，通过微动作传达压力。";
+      if (isCloseUp) performance = "控制面部肌肉，先有心理反应，再有视线流转，停在明确情绪点。";
+
       return {
         id: `script-shot-${sceneIndex + 1}-${index + 1}`,
         durationSeconds: screenplayShotDuration(line),
-        framing: isEstablishing ? "中景，先建立人物与空间关系" : "中近景，清楚捕捉关键动作与情绪",
-        movement: isEstablishing ? "稳定观察，动作开始后再有动机地推进" : isFinal ? "克制推进，停在信息或情绪落点" : "跟随人物动作，保持空间方向连续",
-        performance: "自然呼吸、视线和微小身体反应，避免夸张表演。",
-        sound: "不要背景音乐，只保留环境声与多层空间氛围。",
+        framing,
+        movement,
+        performance,
+        sound: isTense ? "低频氛围压迫感，保留呼吸与关键动作音效。" : "不要背景音乐，只保留环境声与多层空间氛围。",
         status: "planned",
         promptCard: { narrative: line, action: line },
         negativeConstraints: []
