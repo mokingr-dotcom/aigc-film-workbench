@@ -320,6 +320,23 @@
     return element.value.trim() || fallback;
   }
 
+  function lockedProjectVisualBaseline() {
+    const helper = root.aigcProjectContext?.getAutoPrompt;
+    if (typeof helper === "function") return String(helper() || "").trim();
+    const project = root.aigcWorkspaceCore?.getActiveProject?.();
+    const bible = project?.visualBible;
+    if (bible?.status !== "locked") return "";
+    return [bible.mood, bible.colorDirection, bible.lightingDirection, bible.cameraDirection, bible.materialDirection, ...(bible.negativeConstraints || [])].filter(Boolean).join("；");
+  }
+
+  function inheritedLookValue() {
+    const manual = elements.look.value.trim();
+    const baseline = lockedProjectVisualBaseline();
+    if (!baseline) return manual || "未指定；以当前影片类型与海报影调为准";
+    if (manual.includes(baseline)) return manual;
+    return [manual, baseline].filter(Boolean).join("\n");
+  }
+
   function escapeHtml(text) {
     return String(text ?? "")
       .replaceAll("&", "&amp;")
@@ -606,7 +623,7 @@
     const template = currentTemplate();
     const subject = value(elements.subject, "[填写人物、商品或核心主视觉主体]");
     const environment = value(elements.environment, "[填写时代、地点、天气、背景层次、关键物件和材质]");
-    const inheritedLook = value(elements.look, "未指定；以当前影片类型与海报影调为准");
+    const inheritedLook = inheritedLookValue();
     const lighting = lightingProfiles[elements.lighting.value];
     const colorGrade = colorGradeProfiles[elements.colorGrade.value];
     return `【生成任务】\n生成一张${purpose.label}，${elements.ratio.value}构图，高分辨率正式主视觉，不是普通剧照截图，不是简单人物抠图，不是模板化宣传页。\n\n【主体建立模式】\n${state.sourceMode === "text" ? "纯文字新建" : "上传参考图"}。${referenceRule()}。\n\n【主视觉内容】\n主体：${subject}。\n环境与关键元素：${environment}。\n视觉重点：${focusProfiles[elements.focus.value]}。\n\n【主流海报构图形式】\n${composition.label}：${template.promptRule} 保持明确的前景、中景、背景层次，主体轮廓完整，视觉动线最终回到主标题区或核心主体。\n\n【项目继承影调】\n${inheritedLook}。这是本项目统一视觉基线，后续海报布光与色彩只能在此基础上细化，不能改成互相冲突的另一套影片风格。\n\n【影片类型与基础影调】\n类型：${tone.genre}。影调方案：${tone.name}。${tone.rule}。\n\n【电影布光】\n${lighting.label}：${lighting.rule}。明确主光方向、光源高度、软硬程度、主辅光比、环境光来源、轮廓光和局部高光；所有投影方向一致，高光不过曝，暗部不死黑。\n\n【电影色彩关系】\n${colorGrade.label}：${colorGrade.rule}。整张海报只使用一个主色体系、一个辅助色和一个小面积强调色；人物肤色或商品固有色准确，避免多种调色方案互相污染。\n\n【字体与文字排版】\n${typographyRule()}\n\n【海报完成度】\n院线电影或专业商业宣传级Key Art，构图成熟，信息层级清楚，缩略图仍有识别度；真实摄影或与所选类型一致的高质量动画材质，边缘干净，空气、烟雾、雨水、火光、金属、玻璃、布料、皮肤或商品表面具有可信物理质感。画面四周保留安全边距，重要人物脸、标题区和商品主体不贴边。\n\n【限定负面】\n不要廉价模板海报，不要头像无序拼贴，不要主体重复，不要多余人物，不要换脸，不要五官变形，不要手指错误，不要肢体穿模，不要商品变形，不要Logo位置变化，不要背景杂乱，不要光源冲突，不要多重主光，不要投影方向矛盾，不要肤色脏灰，不要高光爆白，不要暗部死黑，不要廉价霓虹堆叠，不要全图单一滤镜染色，不要多套互补色并用，不要渐变色污染整张画面，不要随机文字，不要乱码，不要错误英文，不要伪造演职员名单，不要文字压住眼睛，不要标题贴边，不要过度锐化，不要塑料皮肤，不要游戏CG感，不要水印。`;
@@ -634,11 +651,12 @@
     const lighting = TITLE_MARK_LIGHTING[state.titleMarkLighting];
     const background = TITLE_MARK_BACKGROUNDS[state.titleMarkBackground];
     const outputMode = TITLE_MARK_OUTPUT_MODES[state.titleMarkOutputMode];
+    const projectBaseline = lockedProjectVisualBaseline();
     const metaphor = state.titleMarkMetaphor.trim() || template.metaphorRule;
     const modeRule = state.titleMarkOutputMode === "composite"
       ? `${outputMode.rule}。字标放置规则：${titlePositionProfiles[elements.titlePosition.value]}；保持四周安全边距，避开人物眼睛、关键物件和高光区域，并让字缘光方向服从目标海报主光。`
       : `${outputMode.rule}。${background.rule}，字标完整居中，四周保留足够安全边距，便于后期无损抠取和缩放。`;
-    return `【生成任务】\n设计一套院线电影级原创片名字标，不是选择现成字体，不是普通文字排版；先保证片名准确可读，再进行有限度造字。\n\n【准确文字】\n${titleMarkLanguageRule()}\n\n【字形骨架】\n${skeleton.label}：${skeleton.rule}。\n\n【造字方法】\n${methods.map((method, index) => `${index + 1}. ${method.label}：${method.rule}`).join("\n")}\n\n【单一图形隐喻】\n只使用一个隐喻“${metaphor}”。隐喻必须融入非关键笔画或负形，不能替代文字，不能再叠加第二套图形概念。\n\n【选定字标系统】\n${template.label}：${template.promptRule}。${template.metaphorRule}。\n\n【材质与光影】\n${material.label}：${material.rule}。${lighting.label}：${lighting.rule}。\n\n【语言层级】\n${titleMarkLanguageRule()}\n\n【输出方式】\n${modeRule}\n\n【完成度】\n专业电影片名字标、成熟字体设计、清晰字腔、统一重心、统一笔画逻辑、缩略图可识别、边缘干净、高分辨率。只输出一套最终字标方案。\n\n【限定负面】\n无人物、无场景、无海报排版；不要现成字体直接打字，不要多个字体混搭，不要多个隐喻，不要装饰堆叠，不要廉价3D挤压，不要彩虹渐变，不要游戏Logo感，不要综艺字效，不要笔画互相粘连，不要缺少关键笔画，不要错字、乱码、随机英文，不要自动翻译，不要额外副标题，不要水印。${template.negativeRule}。`;
+    return `【生成任务】\n设计一套院线电影级原创片名字标，不是选择现成字体，不是普通文字排版；先保证片名准确可读，再进行有限度造字。\n\n【准确文字】\n${titleMarkLanguageRule()}\n\n【字形骨架】\n${skeleton.label}：${skeleton.rule}。\n\n【造字方法】\n${methods.map((method, index) => `${index + 1}. ${method.label}：${method.rule}`).join("\n")}\n\n【单一图形隐喻】\n只使用一个隐喻“${metaphor}”。隐喻必须融入非关键笔画或负形，不能替代文字，不能再叠加第二套图形概念。\n\n【选定字标系统】\n${template.label}：${template.promptRule}。${template.metaphorRule}。\n\n【材质与光影】\n${material.label}：${material.rule}。${lighting.label}：${lighting.rule}。\n\n【项目视觉圣经】\n${projectBaseline || "尚未锁定项目视觉圣经；本次仅遵循字标自身的材质与光影规则。"}\n\n【语言层级】\n${titleMarkLanguageRule()}\n\n【输出方式】\n${modeRule}\n\n【完成度】\n专业电影片名字标、成熟字体设计、清晰字腔、统一重心、统一笔画逻辑、缩略图可识别、边缘干净、高分辨率。只输出一套最终字标方案。\n\n【限定负面】\n无人物、无场景、无海报排版；不要现成字体直接打字，不要多个字体混搭，不要多个隐喻，不要装饰堆叠，不要廉价3D挤压，不要彩虹渐变，不要游戏Logo感，不要综艺字效，不要笔画互相粘连，不要缺少关键笔画，不要错字、乱码、随机英文，不要自动翻译，不要额外副标题，不要水印。${template.negativeRule}。`;
   }
 
   function activePosterPrompt() {
@@ -1888,4 +1906,5 @@
   });
   applyLayout();
   render();
+  document.addEventListener("aigc:project-context", () => render());
 })(typeof window !== "undefined" ? window : globalThis);

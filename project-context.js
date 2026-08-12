@@ -14,9 +14,15 @@
 
   function contextPrompt(detail) {
     const bible = detail?.bible || {};
-    const parts = [bible.colorDirection, bible.lightingDirection, bible.cameraDirection, bible.materialDirection, ...(bible.negativeConstraints || [])].filter(Boolean);
+    const parts = [bible.mood, bible.colorDirection, bible.lightingDirection, bible.cameraDirection, bible.materialDirection, ...(bible.negativeConstraints || [])].filter(Boolean);
     if (!parts.length) return "";
     return `${bible.status === "locked" ? "项目视觉基准" : "项目视觉草案"}：${parts.join("；")}`;
+  }
+
+  // Draft visual decisions remain visible for review, but only a locked bible is
+  // allowed to alter outbound generation prompts automatically.
+  function autoPrompt(detail = core.getProjectContext()) {
+    return detail?.bible?.status === "locked" ? contextPrompt(detail) : "";
   }
 
   async function copyText(text) {
@@ -73,5 +79,5 @@
 
   document.addEventListener("aigc:project-context", (event) => render(event.detail));
   render();
-  root.aigcProjectContext = { render, contextPrompt };
+  root.aigcProjectContext = { render, contextPrompt, getAutoPrompt: autoPrompt };
 })(typeof window !== "undefined" ? window : globalThis);

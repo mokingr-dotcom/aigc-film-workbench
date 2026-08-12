@@ -629,6 +629,15 @@
     return element.value.trim() || fallback;
   }
 
+  function lockedProjectVisualBaseline() {
+    const helper = root.aigcProjectContext?.getAutoPrompt;
+    if (typeof helper === "function") return String(helper() || "").trim();
+    const project = root.aigcWorkspaceCore?.getActiveProject?.();
+    const bible = project?.visualBible;
+    if (bible?.status !== "locked") return "";
+    return [bible.mood, bible.colorDirection, bible.lightingDirection, bible.cameraDirection, bible.materialDirection, ...(bible.negativeConstraints || [])].filter(Boolean).join("；");
+  }
+
   function currentIdentityValues() {
     return {
       wardrobe: elements.wardrobe.value,
@@ -702,6 +711,10 @@
     const medium = mediumProfiles[elements.medium.value] || mediumProfiles.live;
     const tone = currentToneProfile();
     const era = eraProfiles[elements.era.value] || eraProfiles.contemporary;
+    const projectBaseline = lockedProjectVisualBaseline();
+    const projectBibleRule = projectBaseline
+      ? `已锁定项目视觉基线：${projectBaseline}。只将其用于服装配色、材质选择、发型与配饰的统一、以及人物的轻微塑形光；不得把角色资料板改造成电影场景，不得改变肤色、真实年龄、身份特征或白色背景。`
+      : "尚未锁定项目视觉圣经；先遵循角色设定、时代纪律和纯白影棚规范。";
     const identityBoardSections = state.layout === "identity" ? `
 
 【服装层级】
@@ -735,7 +748,7 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
     const identityCompositionLock = promptLayoutRules.compositionLock
       ? `\n\n【身份资料板构图硬约束】\n${promptLayoutRules.compositionLock}`
       : "";
-    return `【生成任务】\n为电影AIGC制作${taskName}，资产编号 ${assetId}，${promptLayoutRules.outputFormat}，高分辨率。目标是建立${targetStatus}，不是时尚海报，不是随意概念草图。\n\n【视觉媒介】\n${medium.label}。${medium.material}。\n\n【故事年代与服化道纪律】\n${era}\n\n【影片类型与角色影调】\n影片类型：${tone.genre}。影调方案：${tone.tone}。${tone.description}。类型影调只作用于角色的服装配色、材质倾向和轻微塑形光，白色背景必须保持中性纯白，不能把母版变成电影场景或彩色环境剧照。\n\n【参考图与身份优先级】\n${referenceRule()}\n\n【角色设定】\n角色：${role}。\n年龄与性别：${age}。\n体型与身材比例：${body}。\n脸部身份锚点：${face}。\n发型：${hair}。\n服装：${costume}。\n固定身份特征与道具：${traits}。${identityBoardSections}\n\n【版式与画面占比】\n${layoutRule()}\n\n【缺失视角补全规则】\n${viewCompletionRule()}\n\n【身份一致性硬锁定】\n${identityRule}\n\n【表情与姿态】\n${poseRule()} 不使用夸张表情、戏剧动作、战斗姿势、T字姿势或模特摆拍。\n\n【白底影棚与光影】\n背景为纯白色无缝影棚背景，地面与背景连续，无地平线断层、无灰色渐变墙、无场景道具。${lightingProfiles[elements.lighting.value]}。各面板白平衡、曝光、光向、眼神光、地面阴影强度完全一致。\n\n${materialSection()}${identityCompositionLock}\n\n【限定负面】\n${castingNegativeRule(state.layout, medium.negative)}`;
+    return `【生成任务】\n为电影AIGC制作${taskName}，资产编号 ${assetId}，${promptLayoutRules.outputFormat}，高分辨率。目标是建立${targetStatus}，不是时尚海报，不是随意概念草图。\n\n【视觉媒介】\n${medium.label}。${medium.material}。\n\n【故事年代与服化道纪律】\n${era}\n\n【影片类型与角色影调】\n影片类型：${tone.genre}。影调方案：${tone.tone}。${tone.description}。类型影调只作用于角色的服装配色、材质倾向和轻微塑形光，白色背景必须保持中性纯白，不能把母版变成电影场景或彩色环境剧照。\n\n【项目视觉圣经继承】\n${projectBibleRule}\n\n【参考图与身份优先级】\n${referenceRule()}\n\n【角色设定】\n角色：${role}。\n年龄与性别：${age}。\n体型与身材比例：${body}。\n脸部身份锚点：${face}。\n发型：${hair}。\n服装：${costume}。\n固定身份特征与道具：${traits}。${identityBoardSections}\n\n【版式与画面占比】\n${layoutRule()}\n\n【缺失视角补全规则】\n${viewCompletionRule()}\n\n【身份一致性硬锁定】\n${identityRule}\n\n【表情与姿态】\n${poseRule()} 不使用夸张表情、戏剧动作、战斗姿势、T字姿势或模特摆拍。\n\n【白底影棚与光影】\n背景为纯白色无缝影棚背景，地面与背景连续，无地平线断层、无灰色渐变墙、无场景道具。${lightingProfiles[elements.lighting.value]}。各面板白平衡、曝光、光向、眼神光、地面阴影强度完全一致。\n\n${materialSection()}${identityCompositionLock}\n\n【限定负面】\n${castingNegativeRule(state.layout, medium.negative)}`;
   }
 
   function renderPreview() {
@@ -1418,4 +1431,5 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
   });
 
   render();
+  document.addEventListener("aigc:project-context", () => render());
 })(typeof window !== "undefined" ? window : globalThis);

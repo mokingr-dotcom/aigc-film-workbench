@@ -279,6 +279,23 @@
     return element.value.trim() || fallback;
   }
 
+  function lockedProjectVisualBaseline() {
+    const helper = root.aigcProjectContext?.getAutoPrompt;
+    if (typeof helper === "function") return String(helper() || "").trim();
+    const project = root.aigcWorkspaceCore?.getActiveProject?.();
+    const bible = project?.visualBible;
+    if (bible?.status !== "locked") return "";
+    return [bible.mood, bible.colorDirection, bible.lightingDirection, bible.cameraDirection, bible.materialDirection, ...(bible.negativeConstraints || [])].filter(Boolean).join("；");
+  }
+
+  function visualLook(element, fallback) {
+    const manual = element.value.trim();
+    const baseline = lockedProjectVisualBaseline();
+    if (!baseline) return manual || fallback;
+    if (manual.includes(baseline)) return manual;
+    return [manual, baseline].filter(Boolean).join("\n") || fallback;
+  }
+
   function selectedMechanism(item) {
     if (!item) return "[先从左侧选择一个大师案例或类型模板]";
     if (item.source === "cases") {
@@ -296,7 +313,7 @@
     const item = state.selected;
     const character = fieldValue(elements.character, "附角色三视图或定妆参考图；以参考图作为角色身份最高优先级");
     const scene = fieldValue(elements.scene, "[填写年代、地点、时间、天气、空间结构、关键道具与人物行动路线]");
-    const look = fieldValue(elements.look, "[填写本场继承的影调、色彩关系与主光方向]");
+    const look = visualLook(elements.look, "[填写本场继承的影调、色彩关系与主光方向]");
     const performance = fieldValue(elements.performance, "[填写人物起始情绪、内在变化、眼神、呼吸、重心与细微表演]");
     const action = fieldValue(elements.action, "[填写本场唯一核心事件、关键动作与触发物]");
     const start = fieldValue(elements.beatStart, "先用稳定构图建立人物、空间和压力；摄影机在人物动作触发后自然进入");
@@ -314,7 +331,7 @@
     const performance = fieldValue(elements.performance, "[填写起始情绪、情绪变化、视线、呼吸和身体反应]");
     const action = fieldValue(elements.action, "[填写一个主要动作、关键物件和触发事件]");
     const ending = fieldValue(elements.ending, "15秒结尾停在一个可延续的新状态，为下一镜保留动作方向和视线方向");
-    const look = fieldValue(elements.look, "未指定；以当前运镜案例的光影逻辑为准");
+    const look = visualLook(elements.look, "未指定；以当前运镜案例的光影逻辑为准");
     return `15秒连续真人电影长镜头，单镜头完成，无剪切、无跳切，16:9宽银幕。\n\n【角色参考】${character}。\n【场景】${scene}。\n【项目继承影调】${look}。该影调是本项目统一视觉基线，不得被案例中的其他色彩体系覆盖。\n【人物表演与剧情动作】${performance}；${action}。\n【复刻调度核心】${selectedMechanism(item)}。\n【真人电影质感】可见真实人类皮肤肌理、毛孔、细纹、绒毛、胡茬或轻微瑕疵，自然肤色起伏与湿润反光；真实布料、皮革、金属、木材、墙面和空气颗粒；大画幅IMAX 65mm电影摄影感，宽广动态范围，高光柔和滚降，暗部保留细节，克制胶片颗粒。\n【声音】${elements.sound.value.trim()}。\n【结尾】${ending}。\n【限定负面】不要塑料皮肤、蜡像脸、过度磨皮、游戏CG人物、身份漂移、换脸、五官变形、手指错误、人物复制、穿模、漂浮、背景闪烁、空间跳变、文字水印、Logo、字幕、快速剪辑、无动机环绕、无动机变焦、无关角色。${sourcePrompt(item)}`;
   }
 
@@ -322,7 +339,7 @@
     const item = state.selected;
     const character = fieldValue(elements.character, "引用角色三视图或定妆参考图，锁定同一人物身份、脸部与服装轮廓");
     const scene = fieldValue(elements.scene, "[填写年代、地点、时间、天气、空间结构、关键道具与人物路线]");
-    const look = fieldValue(elements.look, "未指定；继承项目影调，并以当前运镜案例的空间与光影逻辑为准");
+    const look = visualLook(elements.look, "未指定；继承项目影调，并以当前运镜案例的空间与光影逻辑为准");
     const performance = fieldValue(elements.performance, "[填写人物起始情绪、变化、眼神、呼吸与动作反应]");
     const action = fieldValue(elements.action, "[填写本场唯一核心事件、关键动作与触发物]");
     const start = fieldValue(elements.beatStart, "建立人物、空间、起始构图和情绪压力");
@@ -339,7 +356,7 @@
     const performance = fieldValue(elements.performance, "[起始状态 -> 触发反应 -> 情绪变化 -> 结束状态，并写清眼神、呼吸和身体重心]");
     const action = fieldValue(elements.action, "[0-3秒建立；3-6秒触发；6-10秒升级；10-13秒决定；13-15秒新状态]");
     const ending = fieldValue(elements.ending, "[15秒末人物位置、朝向、视线、手中物和摄影机状态，用于接下一镜]");
-    const look = fieldValue(elements.look, "未指定；以当前运镜案例的光影逻辑为准");
+    const look = visualLook(elements.look, "未指定；以当前运镜案例的光影逻辑为准");
     return `【01 镜头任务】\n15秒连续真人电影长镜头，单镜头完成，无剪切、无跳切，16:9宽银幕，镜头运动必须由人物动作、视线变化或信息揭示触发。\n\n【02 角色参考与一致性】\n${character}；保持同一张脸、年龄、肤色、脸型、五官比例、发型、发际线、体型、服装轮廓和固定配饰；参考图只锁角色身份，不照搬静态表情与僵硬姿势。\n\n【03 场景与空间】\n${scene}。写清人物与门窗、桌椅、道路、掩体或关键物件的距离，路线连续，前中后景关系稳定。\n\n【04 项目继承影调】\n${look}。该影调是本项目统一视觉基线，不得被案例中的其他色彩体系覆盖。\n\n【05 人物初始状态与表演弧线】\n${performance}。表演通过眼神焦点、眨眼频率、吞咽、下颌张力、呼吸、手指微动作、肩颈压力、重心转移和短暂停顿体现；不做夸张舞台表演。\n\n【06 剧情动作与15秒节拍】\n${action}。15秒只完成一个核心动作和一次明确的信息升级。\n\n【07 大师调度机制】\n${selectedMechanism(item)}。只复刻空间组织、表演节拍、摄影机触发、构图遮挡与光影逻辑，不复制原片角色、造型和具体画面。\n\n【08 摄影机与构图】\n明确起始景别、机位高度、焦段感、移动方向、速度、主体距离、前景遮挡、轴线和最终落点；运动平滑克制，主体始终可读，不无故绕圈。\n\n【09 光影影调】\n所有光源方向明确，主光、环境光、实景光和轮廓光服务剧情；暗部有细节，高光不过曝，色彩主次清楚，不混合互相冲突的影片影调。\n\n【10 真人材质与摄影质感】\n可见真实人类皮肤肌理、毛孔、细纹、绒毛、胡茬或轻微瑕疵，眼球自然湿润，嘴唇纹理真实；真实布料、皮革、金属、木材、墙面、灰尘、雨水或雾气；大画幅IMAX 65mm电影摄影感，宽广动态范围，高光柔和滚降，暗部层次完整，克制细腻胶片颗粒。\n\n【11 声音设计】\n${elements.sound.value.trim()}。保留多轨环境氛围、空间远近层次和动作同期声，不使用情绪配乐代替表演。\n\n【12 结尾连续性】\n${ending}。\n\n【13 限定负面】\n不要塑料皮肤、蜡像脸、过度磨皮、美颜滤镜、游戏CG人物、卡通感、身份漂移、换脸、五官变形、手指错误、人物复制、穿模、漂浮、背景闪烁、空间跳变、轴线混乱、动作瞬移、无动机环绕、无动机变焦、过度慢动作、文字水印、Logo、字幕、背景音乐、快速剪辑和无关角色。${sourcePrompt(item)}`;
   }
 
@@ -738,4 +755,5 @@
 
   renderLibrary();
   renderComposer();
+  document.addEventListener("aigc:project-context", () => renderComposer());
 })(typeof window !== "undefined" ? window : globalThis);

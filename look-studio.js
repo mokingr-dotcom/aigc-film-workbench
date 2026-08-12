@@ -97,12 +97,22 @@
       type: "music-workspace", id: item.id, name: item.zh || item.en || item.id,
       meta: `${item.region || ""} ${item.family || ""} · 乐器`, icon: "music-2"
     }));
-    const projectItems = (root.aigcWorkspaceCore?.getProjectSnapshot?.().projects || []).map((item) => ({
-      type: "project", id: item.id, projectId: item.id, name: item.name, meta: "本地项目", icon: "folder"
-    }));
-    return [...projectItems, ...cameraItems, ...musicItems, ...posterItems, ...instrumentItems]
+    const core = root.aigcWorkspaceCore;
+    const projectItems = typeof core?.listProjects === "function" ? core.listProjects().map((project) => ({
+      type: "project", id: project.id, projectId: project.id, name: project.name || "未命名电影项目", meta: `项目中心 · ${project.type || "电影项目"}`, icon: "folder-kanban"
+    })) : [];
+    const sceneItems = [];
+    const activeProject = typeof core?.getActiveProject === "function" ? core.getActiveProject() : null;
+    if (activeProject && Array.isArray(activeProject.scenes)) {
+      activeProject.scenes.forEach((scene, sIdx) => {
+        sceneItems.push({
+          type: "scene", id: `scene-${sIdx}`, sceneIndex: sIdx, name: `第 ${sIdx + 1} 场：${scene.title || "未命名场景"}`, meta: `${scene.time || ""} ${scene.location || ""} · 剧本场景`, icon: "file-text"
+        });
+      });
+    }
+    return [...projectItems, ...sceneItems, ...cameraItems, ...musicItems, ...posterItems, ...instrumentItems]
       .filter((item) => matchesQuery(item, normalized))
-      .slice(0, 18);
+      .slice(0, 20);
   }
 
   function analyzeLook(item) {
@@ -264,9 +274,18 @@
       document.querySelector('[data-workspace="poster"]')?.click();
       root.aigcPosterWorkbench?.selectTemplate?.(item.id);
     } else if (item.type === "project") {
-      void root.aigcWorkspaceCore?.openProjectWorkspace?.(item.projectId);
+      if (typeof root.aigcWorkspaceCore?.openProjectWorkspace === "function") {
+        root.aigcWorkspaceCore.openProjectWorkspace(item.projectId);
+      }
     } else if (item.type === "music-workspace") {
       document.querySelector('[data-workspace="music"]')?.click();
+    } else if (item.type === "scene") {
+      document.querySelector('[data-workspace="projects"]')?.click();
+      root.setTimeout(() => {
+        const sceneCard = document.querySelector(`[data-scene-index="${item.sceneIndex}"]`);
+        sceneCard?.scrollIntoView({ behavior: "smooth", block: "center" });
+        sceneCard?.click();
+      }, 150);
     }
     closeCommand();
   }
