@@ -62,7 +62,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
   --music-right-width: 490px;
   display: grid;
   grid-template-columns: var(--music-left-width) 6px minmax(430px, 1fr) 6px var(--music-right-width);
-  grid-template-rows: minmax(0, 1fr) 34px;
+  grid-template-rows: auto minmax(0, 1fr) 34px;
   height: calc(100vh - 66px);
   min-height: 640px;
   overflow: hidden;
@@ -87,7 +87,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
 }
 
 #music-workspace :is(.music-library-panel, .music-structure-panel, .music-output-panel) {
-  grid-row: 1;
+  grid-row: 2;
   min-width: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -831,7 +831,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
 
 #music-workspace .music-column-resizer {
   position: relative;
-  grid-row: 1;
+  grid-row: 2;
   background: rgb(37 38 34 / 10%);
   cursor: col-resize;
   transition: background-color 160ms ease;
@@ -864,7 +864,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
 #music-workspace .music-status-bar {
   display: flex;
   grid-column: 1 / -1;
-  grid-row: 2;
+  grid-row: 3;
   align-items: center;
   gap: 0;
   min-width: 0;
@@ -974,7 +974,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
   #music-workspace {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 46px minmax(0, 1fr) 34px;
+    grid-template-rows: 46px auto minmax(0, 1fr) 34px;
     height: calc(100dvh - 66px);
     min-height: 0;
   }
@@ -1007,7 +1007,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
 
   #music-workspace :is(.music-library-panel, .music-structure-panel, .music-output-panel) {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 3;
     padding: 20px 18px 34px;
   }
 
@@ -1023,7 +1023,7 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
 
   #music-workspace .music-status-bar {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 4;
     padding: 0 12px;
     overflow-x: auto;
   }
