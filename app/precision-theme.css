@@ -1,0 +1,363 @@
+:root {
+  color-scheme: light;
+  --precision-canvas: #eef0f2;
+  --precision-panel: #f8f8f6;
+  --precision-input: #ffffff;
+  --precision-ink: #20252a;
+  --precision-muted: #687078;
+  --precision-line: #cbd0d4;
+  --precision-blue: #245f9c;
+  --precision-blue-soft: #e6edf5;
+  --precision-monitor: #181c20;
+  --precision-copper: #9b6636;
+  --precision-focus: rgba(36, 95, 156, 0.28);
+  --command-height: 64px;
+}
+
+html, body {
+  min-width: 320px;
+  background: var(--precision-canvas);
+  color: var(--precision-ink);
+}
+
+body {
+  padding: var(--command-height) 0 0;
+  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.cinema-atmosphere {
+  display: none;
+}
+
+.workspace-header.workspace-commandbar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: minmax(220px, 260px) minmax(520px, 1fr) minmax(250px, 320px);
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+  min-height: 0;
+  height: var(--command-height);
+  padding: 0 16px;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--precision-line);
+  border-radius: 0;
+  background: rgba(248, 248, 246, .96);
+  box-shadow: none;
+  backdrop-filter: saturate(1.1) blur(14px);
+}
+
+.workspace-header.workspace-commandbar > * {
+  min-width: 0;
+}
+
+.workspace-brand {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.workspace-brand strong {
+  overflow: hidden;
+  color: var(--precision-ink);
+  font-size: 14px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-brand span {
+  overflow: hidden;
+  color: var(--precision-muted);
+  font-size: 11px;
+  line-height: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mode-switch {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-columns: auto;
+  gap: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.mode-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 8px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--precision-muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mode-button small {
+  display: none;
+}
+
+.mode-button svg {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+}
+
+.mode-button:hover {
+  color: var(--precision-ink);
+  background: var(--precision-blue-soft);
+}
+
+.mode-button.active {
+  border-bottom-color: var(--precision-blue);
+  background: transparent;
+  box-shadow: none;
+  color: var(--precision-blue);
+}
+
+.command-context {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.project-strip {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+
+.project-strip label {
+  display: block;
+  min-width: 0;
+}
+
+.project-strip label span,
+.command-trigger > span,
+.command-trigger kbd {
+  display: none;
+}
+
+.project-strip input {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 6px 8px;
+  overflow: hidden;
+  border-color: var(--precision-line);
+  background: var(--precision-input);
+  color: var(--precision-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-trigger,
+.project-strip .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+
+.command-trigger svg,
+.project-strip .button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.project-strip .button {
+  font-size: 0;
+}
+
+.project-save-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.button, .icon-button, input, select, textarea, .segment, .tab {
+  border-radius: 5px;
+  box-shadow: none;
+}
+
+.button,
+.icon-button,
+.command-trigger,
+.segment,
+.tab,
+input,
+select,
+textarea {
+  border-color: var(--precision-line);
+  color: var(--precision-ink);
+}
+
+.button:not(.primary),
+.icon-button,
+.command-trigger,
+.segment:not(.active),
+.tab:not(.active),
+input,
+select,
+textarea {
+  background: var(--precision-input);
+}
+
+.segmented {
+  gap: 2px;
+  padding: 2px;
+  border-color: var(--precision-line);
+  border-radius: 5px;
+  background: var(--precision-blue-soft);
+}
+
+.button.primary, .segment.active, .tab.active {
+  border-color: var(--precision-blue);
+  background: var(--precision-blue);
+  color: #fff;
+}
+
+.button.secondary:hover,
+.icon-button:hover,
+.command-trigger:hover,
+.segment:not(.active):hover,
+.tab:not(.active):hover {
+  border-color: var(--precision-blue);
+  background: var(--precision-blue-soft);
+}
+
+:is(.field input, .field select, .field textarea, .button, .icon-button, .command-trigger, .mode-button, .segment, .tab):focus-visible {
+  outline: 2px solid var(--precision-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px var(--precision-focus);
+}
+
+:is(.button, .icon-button, .command-trigger, .mode-button, .segment, .tab, input, select, textarea):disabled {
+  border-color: var(--precision-line);
+  background: var(--precision-blue-soft);
+  color: var(--precision-muted);
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.field > span {
+  color: var(--precision-muted);
+}
+
+@media (max-width: 1120px) {
+  .workspace-header.workspace-commandbar {
+    grid-template-columns: minmax(170px, 220px) minmax(0, 1fr) 112px;
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .mode-button {
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .project-strip {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 800px) {
+  .workspace-header.workspace-commandbar {
+    grid-template-columns: 52px minmax(0, 1fr) 72px;
+    gap: 4px;
+    padding: 0 8px;
+  }
+
+  .workspace-brand strong {
+    font-size: 0;
+  }
+
+  .workspace-brand strong::before {
+    content: "AIGC";
+    font-size: 11px;
+  }
+
+  .workspace-brand span,
+  .project-strip label {
+    display: none;
+  }
+
+  .project-strip {
+    grid-template-columns: 32px 0 32px;
+    justify-content: end;
+  }
+
+  .project-strip .button {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 560px) {
+  .workspace-header.workspace-commandbar {
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .workspace-brand,
+  .command-trigger {
+    display: none;
+  }
+
+  .mode-button {
+    gap: 0;
+    padding: 0 4px;
+  }
+
+  .mode-button span {
+    font-size: 0;
+  }
+
+  .mode-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .project-strip {
+    grid-template-columns: 32px;
+  }
+
+  .project-strip .button {
+    grid-column: 1;
+  }
+}

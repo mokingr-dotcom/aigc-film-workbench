@@ -1,0 +1,625 @@
+/* Reverse analysis workspace: compact, evidence-first production surface. */
+#reverse-workspace.reverse-production-shell {
+  --reverse-left-width: 300px;
+  --reverse-right-width: 500px;
+  --reverse-resizer-width: 9px;
+  --reverse-surface: #f7f8f5;
+  --reverse-surface-raised: #ffffff;
+  --reverse-canvas: #e4e8e5;
+  --reverse-ink: #1d2925;
+  --reverse-muted: #63706a;
+  --reverse-line: #c8d1cc;
+  --reverse-line-strong: #a9b7b0;
+  --reverse-accent: #176b5d;
+  --reverse-accent-soft: #e4f1eb;
+  --reverse-warning: #9c6633;
+  --reverse-error: #a44640;
+  display: grid;
+  grid-template-columns: var(--reverse-left-width) var(--reverse-resizer-width) minmax(500px, 1fr) var(--reverse-resizer-width) var(--reverse-right-width);
+  gap: 0;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: calc(100vh - var(--studio-header-height, 66px));
+  min-height: 0;
+  padding: 12px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--reverse-ink);
+  background: var(--reverse-canvas);
+  letter-spacing: 0;
+}
+
+#reverse-workspace[hidden] {
+  display: none;
+}
+
+#reverse-workspace :is(button, input, select, textarea) {
+  font: inherit;
+  letter-spacing: 0;
+}
+
+#reverse-workspace :is(.reverse-reference-panel, .reverse-analysis-panel, .reverse-result-panel) {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--reverse-line);
+  border-radius: 4px;
+  background: var(--reverse-surface);
+  box-shadow: 0 6px 18px rgba(31, 48, 41, 0.06);
+}
+
+#reverse-workspace .reverse-reference-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+#reverse-workspace .reverse-analysis-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+#reverse-workspace .reverse-result-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+#reverse-workspace .reverse-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--reverse-line);
+}
+
+#reverse-workspace .reverse-panel-header :is(h1, h2) {
+  margin: 0;
+  color: var(--reverse-ink);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+#reverse-workspace .reverse-panel-header p {
+  margin: 3px 0 0;
+  color: var(--reverse-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#reverse-workspace .reverse-panel-status {
+  flex: 0 0 auto;
+  padding: 4px 6px;
+  border: 1px solid #b6cdc4;
+  border-radius: 3px;
+  color: var(--reverse-accent);
+  background: var(--reverse-accent-soft);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#reverse-workspace .field {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+#reverse-workspace .field > span {
+  color: #56645e;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+#reverse-workspace :is(input, select, textarea) {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #c2cdc7;
+  border-radius: 3px;
+  color: #26342e;
+  background: var(--reverse-surface-raised);
+  box-shadow: none;
+}
+
+#reverse-workspace :is(input, select) {
+  min-height: 35px;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+#reverse-workspace textarea {
+  min-height: 76px;
+  padding: 8px 9px;
+  font-size: 12px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+#reverse-workspace :is(input, select, textarea):focus-visible,
+#reverse-workspace .button:focus-visible {
+  outline: 2px solid var(--reverse-accent);
+  outline-offset: 2px;
+}
+
+#reverse-workspace .button {
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid var(--reverse-line-strong);
+  border-radius: 3px;
+  color: #3c4c45;
+  background: #fdfefd;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#reverse-workspace .button:hover {
+  border-color: var(--reverse-accent);
+  color: var(--reverse-accent);
+}
+
+#reverse-workspace .button.primary {
+  border-color: var(--reverse-accent);
+  color: #ffffff;
+  background: var(--reverse-accent);
+}
+
+#reverse-workspace .button.primary:hover {
+  color: #ffffff;
+  background: #12594e;
+}
+
+#reverse-workspace .button:disabled {
+  border-color: var(--reverse-line);
+  color: #87918b;
+  background: #eef1ee;
+  cursor: not-allowed;
+}
+
+#reverse-workspace .reverse-upload-board {
+  display: grid;
+  gap: 7px;
+}
+
+#reverse-workspace .reverse-upload {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px dashed #aebbb5;
+  border-radius: 4px;
+  color: var(--reverse-muted);
+  background: #edf1ee;
+  cursor: not-allowed;
+}
+
+#reverse-workspace .reverse-upload.active {
+  border-color: var(--reverse-accent);
+  background: #f1f7f4;
+  cursor: pointer;
+}
+
+#reverse-workspace .reverse-upload.active:hover {
+  border-style: solid;
+}
+
+#reverse-workspace .reverse-upload img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #e6ebe7;
+}
+
+#reverse-workspace .reverse-upload :is(img[hidden], span[hidden]) {
+  display: none;
+}
+
+#reverse-workspace .reverse-upload > span {
+  max-width: 24ch;
+  padding: 12px;
+  color: #59665f;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+}
+
+#reverse-workspace .reverse-upload:has(img:not([hidden]))::after {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  padding: 3px 5px;
+  border: 1px solid #afd0c3;
+  border-radius: 3px;
+  color: #166452;
+  background: #f4faf7;
+  content: "本地预览已加载";
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+#reverse-workspace .reverse-upload.is-error {
+  border-color: #c9827e;
+  color: var(--reverse-error);
+  background: #fbf0ef;
+}
+
+#reverse-workspace .reverse-upload.is-error::after {
+  content: "图片无法预览";
+}
+
+#reverse-workspace .reverse-privacy-note {
+  margin: 0;
+  padding: 7px 8px;
+  border-left: 3px solid #9bb8ad;
+  color: #57645e;
+  background: #edf2ef;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#reverse-workspace .reverse-task-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 2px;
+}
+
+#reverse-workspace .reverse-task-settings .field-span-2 {
+  grid-column: 1 / -1;
+}
+
+#reverse-workspace .reverse-column-separator,
+#reverse-workspace .reverse-column-resizer {
+  position: relative;
+  min-width: 0;
+  cursor: col-resize;
+}
+
+#reverse-workspace .reverse-column-separator::before,
+#reverse-workspace .reverse-column-resizer::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 4px;
+  width: 1px;
+  background: var(--reverse-line-strong);
+  content: "";
+}
+
+#reverse-workspace .reverse-column-separator:hover::before,
+#reverse-workspace .reverse-column-resizer:hover::before {
+  width: 3px;
+  left: 3px;
+  background: var(--reverse-accent);
+}
+
+#reverse-workspace .reverse-column-separator:focus-visible,
+#reverse-workspace .reverse-column-resizer:focus-visible {
+  outline: 2px solid var(--reverse-accent);
+  outline-offset: -1px;
+}
+
+#reverse-workspace #reverse-dimension-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 9px;
+  min-height: 0;
+  padding-right: 2px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+#reverse-workspace .reverse-dimension-field {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 3px 7px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--reverse-line);
+  border-radius: 3px;
+  background: var(--reverse-surface-raised);
+}
+
+#reverse-workspace .reverse-dimension-field::before {
+  grid-row: 1 / span 3;
+  color: #748078;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+#reverse-workspace .reverse-dimension-field:nth-child(1)::before { content: "01"; }
+#reverse-workspace .reverse-dimension-field:nth-child(2)::before { content: "02"; }
+#reverse-workspace .reverse-dimension-field:nth-child(3)::before { content: "03"; }
+#reverse-workspace .reverse-dimension-field:nth-child(4)::before { content: "04"; }
+#reverse-workspace .reverse-dimension-field:nth-child(5)::before { content: "05"; }
+#reverse-workspace .reverse-dimension-field:nth-child(6)::before { content: "06"; }
+#reverse-workspace .reverse-dimension-field:nth-child(7)::before { content: "07"; }
+#reverse-workspace .reverse-dimension-field:nth-child(8)::before { content: "08"; }
+
+#reverse-workspace .reverse-dimension-field > span {
+  color: #304038;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+#reverse-workspace .reverse-dimension-field > small {
+  display: block;
+  color: var(--reverse-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#reverse-workspace .reverse-dimension-field::after {
+  grid-column: 2;
+  color: #6e7973;
+  content: "由目标模型补充";
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+#reverse-workspace .reverse-dimension-field textarea {
+  grid-column: 1 / -1;
+  min-height: 80px;
+  resize: vertical;
+}
+
+#reverse-workspace .reverse-dimension-field.calibrated {
+  border-color: #9bbdaf;
+  background: #f5faf7;
+}
+
+#reverse-workspace .reverse-dimension-field.calibrated::after {
+  color: var(--reverse-accent);
+  content: "人工校准";
+}
+
+#reverse-workspace .reverse-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--reverse-line);
+}
+
+#reverse-workspace .reverse-toolbar .button {
+  min-width: 0;
+}
+
+#reverse-workspace .reverse-status {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  padding-left: 8px;
+  border-left: 3px solid var(--reverse-warning);
+}
+
+#reverse-workspace .reverse-status span {
+  color: var(--reverse-muted);
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+#reverse-workspace .reverse-status strong {
+  overflow: hidden;
+  color: #3b4a42;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#reverse-workspace .reverse-result-status {
+  padding: 8px 9px;
+  border-left: 3px solid var(--reverse-warning);
+  background: #f7f3ed;
+}
+
+#reverse-workspace .reverse-result-status p {
+  margin: 0;
+  color: #5e625d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#reverse-workspace .reverse-result-status .ready {
+  color: var(--reverse-accent);
+  font-weight: 700;
+}
+
+#reverse-workspace .reverse-calibration-summary {
+  margin-top: 3px !important;
+}
+
+#reverse-workspace .reverse-output-field {
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+#reverse-workspace .reverse-output-field textarea {
+  min-height: 0;
+  height: 100%;
+  padding: 10px;
+  overflow: auto;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: none;
+}
+
+#reverse-workspace .reverse-file-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding-top: 9px;
+  border-top: 1px solid var(--reverse-line);
+  color: var(--reverse-muted);
+  font-size: 10px;
+}
+
+#reverse-workspace .reverse-file-row code {
+  overflow: hidden;
+  color: #4a5b53;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 1181px) and (max-width: 1360px) {
+  #reverse-workspace.reverse-production-shell {
+    --reverse-left-width: 210px;
+    --reverse-right-width: 420px;
+  }
+}
+
+@media (max-width: 1180px) {
+  #reverse-workspace.reverse-production-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: calc(100vh - var(--studio-header-height, 66px));
+    padding: 10px;
+    overflow: visible;
+  }
+
+  #reverse-workspace .reverse-column-separator,
+  #reverse-workspace .reverse-column-resizer {
+    display: none;
+  }
+
+  #reverse-workspace .reverse-reference-panel {
+    height: min(640px, calc(100vh - var(--studio-header-height, 66px) - 20px));
+    min-height: 340px;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #reverse-workspace .reverse-analysis-panel {
+    grid-template-rows: auto auto minmax(0, 1fr);
+    height: min(640px, calc(100vh - var(--studio-header-height, 66px) - 20px));
+    min-height: 340px;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #reverse-workspace #reverse-dimension-grid {
+    overflow-y: auto;
+  }
+
+  #reverse-workspace .reverse-result-panel {
+    grid-template-rows: auto auto minmax(360px, 1fr) auto;
+    height: min(640px, calc(100vh - var(--studio-header-height, 66px) - 20px));
+    min-height: 340px;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  #reverse-workspace .reverse-output-field textarea {
+    min-height: 360px;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1180px) {
+  #reverse-workspace .reverse-reference-panel {
+    grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-items: start;
+    column-gap: 16px;
+  }
+
+  #reverse-workspace .reverse-panel-header {
+    grid-column: 1 / -1;
+  }
+
+  #reverse-workspace .reverse-reference-panel > .field {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #reverse-workspace .reverse-upload-board {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  #reverse-workspace .reverse-task-settings {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-content: start;
+  }
+}
+
+@media (max-width: 820px) {
+  #reverse-workspace.reverse-production-shell {
+    padding: 8px;
+  }
+
+  #reverse-workspace :is(.reverse-reference-panel, .reverse-analysis-panel, .reverse-result-panel) {
+    padding: 11px;
+  }
+
+  #reverse-workspace .reverse-panel-header {
+    gap: 7px;
+  }
+
+  #reverse-workspace .reverse-task-settings,
+  #reverse-workspace #reverse-dimension-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #reverse-workspace .reverse-task-settings .field-span-2 {
+    grid-column: auto;
+  }
+
+  #reverse-workspace .reverse-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #reverse-workspace .reverse-status {
+    grid-column: 1 / -1;
+  }
+
+  #reverse-workspace .reverse-toolbar .button {
+    padding-right: 5px;
+    padding-left: 5px;
+    font-size: 10px;
+  }
+
+  #reverse-workspace .reverse-dimension-field {
+    grid-template-columns: 22px minmax(0, 1fr);
+  }
+}

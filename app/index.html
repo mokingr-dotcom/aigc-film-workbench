@@ -1,0 +1,1423 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AIGC电影提示词工作台</title>
+    <link rel="icon" type="image/png" href="assets/tone-option2-reference-3.png">
+    <link rel="stylesheet" href="style.css?v=20260714-cinematic-console">
+    <link rel="stylesheet" href="look-studio.css?v=20260714-dense-workbench">
+    <link rel="stylesheet" href="tone-option2.css?v=20260717-tone-library-colors-v3">
+    <link rel="stylesheet" href="camera-option-a-seedance30-layout.css?v=20260811-v1">
+    <link rel="stylesheet" href="casting-option-3.css?v=20260715-role-archive">
+    <link rel="stylesheet" href="poster-three-column.css?v=20260720-poster-layer-delete-v25">
+    <link rel="stylesheet" href="poster-compositor.css?v=20260720-poster-layer-delete-v25">
+    <link rel="stylesheet" href="reverse-three-column.css?v=20260717-reverse-three-column-v1">
+    <link rel="stylesheet" href="music-workspace.css?v=20260812-takeover-state-sync-v1">
+    <link rel="stylesheet" href="project-dashboard.css?v=20260721-project-name-foundation-v3">
+  <link rel="stylesheet" href="project-scenes.css?v=20260812-model-continuity-v1">
+  </head>
+  <body>
+    <div class="cinema-atmosphere" aria-hidden="true">
+      <span class="cinema-grain"></span>
+      <span class="cinema-scanline"></span>
+    </div>
+
+    <header class="workspace-header workspace-commandbar">
+      <div class="workspace-brand">
+        <strong>AIGC电影视觉工作台</strong>
+        <span>影调 · 镜头 · 角色 · 视觉物料</span>
+      </div>
+      <div class="mode-switch" role="tablist" aria-label="工作模式">
+        <button id="project-mode-button" class="mode-button active" type="button" data-workspace="projects" role="tab" aria-selected="true" title="项目桌面">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i><span>项目</span><small>项目管理</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="tone" role="tab" aria-selected="false" title="影调">
+          <i data-lucide="palette" aria-hidden="true"></i><span>影调</span><small>LOOK</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="camera" role="tab" aria-selected="false" title="运镜">
+          <i data-lucide="video" aria-hidden="true"></i><span>运镜</span><small>CAMERA</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="casting" role="tab" aria-selected="false" title="角色定妆">
+          <i data-lucide="scan-face" aria-hidden="true"></i><span>角色定妆</span><small>CAST</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="poster" role="tab" aria-selected="false" title="海报">
+          <i data-lucide="panels-top-left" aria-hidden="true"></i><span>海报</span><small>KEY ART</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="reverse" role="tab" aria-selected="false" title="画面反推">
+          <i data-lucide="scan-search" aria-hidden="true"></i><span>画面反推</span><small>ANALYZE</small>
+        </button>
+        <button class="mode-button" type="button" data-workspace="music" role="tab" aria-selected="false" title="音乐配乐">
+          <i data-lucide="audio-lines" aria-hidden="true"></i><span>音乐配乐</span><small>SCORE</small>
+        </button>
+      </div>
+      <div class="command-context" aria-live="polite">
+        <span id="workspace-section-code">LOOK DEVELOPMENT</span>
+        <strong id="workspace-section-title">影调生成</strong>
+        <div class="command-palette" aria-label="当前工作台色彩">
+          <span class="palette-primary" title="主操作色"></span>
+          <span class="palette-secondary" title="辅助光色"></span>
+          <span class="palette-signal" title="信号强调色"></span>
+        </div>
+      </div>
+      <div class="project-strip" aria-label="当前项目">
+        <button id="command-center-open" type="button" class="command-trigger" aria-label="打开全局搜索" title="全局搜索 Command K">
+          <i data-lucide="search" aria-hidden="true"></i><span>搜索全站</span><kbd>⌘ K</kbd>
+        </button>
+        <label>
+          <span>当前项目</span>
+          <input id="project-name" type="text" value="未命名电影项目" aria-label="当前项目名称">
+        </label>
+        <span id="project-save-status" class="project-save-status"><i data-lucide="cloud-check" aria-hidden="true"></i>已自动保存</span>
+        <button id="project-center-open" type="button" class="button secondary"><i data-lucide="folder-kanban" aria-hidden="true"></i>项目中心</button>
+      </div>
+    </header>
+
+    <div id="project-dialog" class="project-dialog" hidden>
+      <div class="project-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="project-dialog-title">
+        <header>
+          <div>
+            <h2 id="project-dialog-title">项目中心</h2>
+            <p>项目资料只保存在当前浏览器，可导出备份。</p>
+          </div>
+          <button id="project-center-close" type="button" class="icon-button" aria-label="关闭项目中心" title="关闭"><i data-lucide="x" aria-hidden="true"></i></button>
+        </header>
+        <div class="project-dialog-actions">
+          <button id="project-new" type="button" class="button primary">新建项目</button>
+          <button id="project-duplicate" type="button" class="button secondary">复制当前项目</button>
+          <button id="project-export-package" type="button" class="button primary">导出完整项目包</button>
+          <button id="project-export" type="button" class="button secondary">导出 JSON 备份</button>
+          <label class="button secondary project-import-label" for="project-import">导入项目</label>
+          <input id="project-import" type="file" accept="application/zip,.zip,.aigc-project.zip,application/json,.json" hidden>
+        </div>
+        <div id="project-list" class="project-list" aria-label="本地项目列表"></div>
+      </div>
+    </div>
+
+    <div id="command-center" class="command-center" hidden>
+      <div class="command-center-panel" role="dialog" aria-modal="true" aria-labelledby="command-center-title">
+        <header class="command-center-search">
+          <i data-lucide="search" aria-hidden="true"></i>
+          <label for="command-center-input" id="command-center-title" class="sr-only">全局搜索</label>
+          <input id="command-center-input" type="search" autocomplete="off" placeholder="搜索导演、影片、影调、场景或工作台">
+          <kbd>ESC</kbd>
+        </header>
+        <div id="command-center-results" class="command-center-results" role="listbox"></div>
+        <footer><span>↑↓ 选择</span><span>Enter 打开</span><span>支持影片名与提示词关键词</span></footer>
+      </div>
+    </div>
+
+    <div id="workspace-toast" class="workspace-toast" role="status" aria-live="polite" hidden></div>
+
+    <main id="project-workspace" class="project-dashboard workspace-view active" data-workspace-view="projects">
+      <aside class="project-rail" aria-label="项目分类">
+        <div class="project-library-status">
+          <span>本地项目</span>
+          <strong>本地项目库</strong>
+          <small id="project-library-count">0 个项目</small>
+        </div>
+        <button id="project-dashboard-new" class="project-new-command" type="button"><i data-lucide="plus" aria-hidden="true"></i>新建影视项目</button>
+        <nav id="project-category-nav" aria-label="项目筛选"></nav>
+        <div class="project-rail-note"><i data-lucide="hard-drive" aria-hidden="true"></i><span>项目与素材保存在当前浏览器</span></div>
+      </aside>
+
+      <section id="project-center-column" class="project-center-column" aria-label="项目内容">
+        <div class="project-center-tools">
+          <label class="project-mobile-filter">项目分类
+            <select id="project-category-select">
+              <option value="all">全部项目</option><option value="recent">最近项目</option><option value="favorite">收藏项目</option><option value="backup">备份项目</option>
+            </select>
+          </label>
+          <button id="project-detail-open" type="button" aria-controls="project-active-detail"><i data-lucide="panel-right-open" aria-hidden="true"></i>项目详情</button>
+        </div>
+
+        <section id="project-spotlight" class="project-spotlight" aria-label="当前影视项目"></section>
+
+        <section id="project-visual-bible" class="project-visual-bible" aria-label="项目视觉圣经"></section>
+
+        <section id="project-production-strip" class="project-production-strip" aria-label="项目场次制作进度"></section>
+
+        <section id="project-screenplay-start" class="project-screenplay-start" aria-labelledby="project-screenplay-heading">
+          <header><span>01 / SCREENPLAY</span><h2 id="project-screenplay-heading">从剧本开始</h2><p>先保留场次草稿，再确认写入项目。</p></header>
+          <div class="project-screenplay-editor">
+            <div class="project-screenplay-toolbar" role="toolbar" aria-label="剧本来源">
+              <button id="project-screenplay-new" type="button">新建剧本</button>
+              <button id="project-screenplay-paste" type="button">粘贴文本</button>
+              <label class="project-screenplay-file-label">上传剧本<input id="project-screenplay-file" type="file" accept=".txt,.docx,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label>
+            </div>
+            <label class="project-screenplay-title-field"><span>剧本标题</span><input id="project-screenplay-title" type="text" maxlength="100" placeholder="未命名剧本"></label>
+            <textarea id="project-screenplay-input" rows="8" maxlength="60000" placeholder="例如：\n第 01 场 外景 港口码头 冬夜\n林岚独自穿过候船厅，手里攥着证物。\n\n第 02 场 内景 旧旅馆房间 凌晨\n她把证物放到桌上，听见走廊传来脚步声。"></textarea>
+            <details class="project-ai-analysis-settings"><summary>AI 导演分析设置（本地密钥不保存）</summary><div><label>接口地址<input id="project-ai-endpoint" type="url" placeholder="填写模型服务地址（须含协议）"></label><label>模型名称<input id="project-ai-model" type="text" placeholder="填写你的文本模型名称"></label><label>API 密钥<input id="project-ai-key" type="password" autocomplete="off" placeholder="仅本次浏览器会话使用"></label></div></details>
+            <details id="project-screenplay-external" class="project-ai-analysis-settings"><summary>使用任意文本模型拆场拆镜（无需 API）</summary><div class="project-external-analysis"><p>复制导演拆解模板，在任意文本模型完成分析后，将返回的 JSON 粘贴到这里。系统只会生成可审核草稿，不会直接覆盖你的正式分镜。</p><div class="project-external-analysis-actions"><button id="project-screenplay-copy-template" type="button">复制导演拆解模板</button><button id="project-screenplay-import-result" type="button">读取为待确认分镜</button></div><label>模型返回的 scenes JSON<textarea id="project-screenplay-external-result" rows="8" maxlength="120000" placeholder='粘贴 {"scenes":[...]}，支持 ```json 代码块。'></textarea></label></div></details>
+          </div>
+          <footer><p id="project-screenplay-meta">未导入剧本。草稿不会影响已保存的场次。</p><span id="project-screenplay-version">0 个历史版本</span><p id="project-screenplay-preview" aria-live="polite"></p><section id="project-screenplay-diff" class="project-screenplay-diff" aria-label="剧本重分析逐场确认" hidden></section><span id="project-screenplay-error" role="alert"></span><div class="project-screenplay-actions"><button id="project-screenplay-clear" type="button" hidden>移除已保存剧本</button><button id="project-screenplay-analyze" type="button">仅做本地格式识别</button><button id="project-screenplay-ai-analyze" type="button">AI 导演分析并拆分镜头</button><button id="project-screenplay-confirm" type="button" disabled>确认写入正式分镜</button></div></footer>
+        </section>
+
+        <section id="project-scene-workbench" class="project-scene-workbench" aria-label="场次剧本台">
+          <aside class="project-scene-rail">
+            <header><span>SCENE SHEET</span><h2>场次剧本台</h2><p>一场一张制作提示词单。</p></header>
+            <div class="project-scene-rail-actions"><button id="project-scene-add" type="button">新增场次</button><button id="project-scene-build-eight" type="button">建立 8 场骨架</button></div>
+            <nav id="project-scene-list" class="project-scene-list" aria-label="项目场次"></nav>
+          </aside>
+          <section id="project-scene-editor" class="project-scene-editor" aria-label="当前场次编辑"></section>
+          <aside id="project-scene-prompt" class="project-scene-prompt" aria-label="当前镜头提示词"></aside>
+        </section>
+        <input id="project-character-reference-upload" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+        <input id="project-location-reference-upload" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+
+        <section class="project-section project-progress-section" aria-labelledby="project-stage-title">
+          <header class="project-section-header"><div><span>制作进度</span><h2 id="project-stage-title">当前制作进度</h2></div><span id="project-stage-meta"></span></header>
+          <div id="project-stage-list" class="project-stage-list"></div>
+        </section>
+
+        <section class="project-section project-library-section" aria-labelledby="project-recent-title">
+          <header class="project-section-header project-library-header">
+            <div><span>项目库</span><h2 id="project-recent-title">最近项目</h2></div>
+            <div class="project-library-controls">
+              <label class="project-search-field"><i data-lucide="search" aria-hidden="true"></i><span class="sr-only">搜索项目</span><input id="project-dashboard-search" type="search" placeholder="搜索项目"></label>
+              <label><span class="sr-only">排序</span><select id="project-dashboard-sort"><option value="updated-desc">最近更新</option><option value="created-desc">最近创建</option><option value="name-asc">名称排序</option></select></label>
+            </div>
+          </header>
+          <div id="project-card-list" class="project-card-list" role="listbox" aria-label="影视项目"></div>
+        </section>
+      </section>
+
+      <aside id="project-active-detail" class="project-active-detail" role="dialog" aria-label="当前项目详情">
+        <button id="project-detail-close" class="project-detail-close" type="button" aria-label="关闭项目详情"><i data-lucide="x" aria-hidden="true"></i></button>
+        <div id="project-active-detail-content"></div>
+      </aside>
+    </main>
+
+    <dialog id="project-onboarding-dialog" class="project-onboarding-dialog" aria-labelledby="project-onboarding-title">
+      <form id="project-onboarding-form" method="dialog">
+        <header><span>新建项目</span><h2 id="project-onboarding-title">建立影视项目</h2><p>先确定最基本的制作边界，随后进入六个创作工作台。</p></header>
+        <label><span>项目名称</span><input id="project-onboarding-name" maxlength="60" required placeholder="例如：雾港来信"></label>
+        <div class="project-onboarding-grid">
+          <label><span>项目类型</span><select id="project-onboarding-type"><option value="drama">剧情片</option><option value="documentary">纪录片</option><option value="commercial">广告 / 宣传片</option><option value="animation">动画</option><option value="short">短片</option><option value="series">剧集</option></select></label>
+          <label><span>画幅</span><select id="project-onboarding-aspect"><option value="16:9">16:9</option><option value="2.39:1">2.39:1</option><option value="1.85:1">1.85:1</option><option value="4:3">4:3</option><option value="9:16">9:16</option></select></label>
+        </div>
+        <div class="project-onboarding-grid project-duration-row">
+          <label><span>预计时长</span><input id="project-onboarding-duration" type="number" min="1" step="1" placeholder="可稍后填写"></label>
+          <label><span>单位</span><select id="project-onboarding-duration-unit"><option value="minutes">分钟</option><option value="seconds">秒</option></select></label>
+        </div>
+        <p id="project-onboarding-error" class="project-onboarding-error" role="alert"></p>
+        <footer><button id="project-onboarding-import" type="button" class="button secondary"><i data-lucide="upload" aria-hidden="true"></i>导入备份</button><button id="project-onboarding-submit" type="submit" class="button primary">建立项目</button></footer>
+      </form>
+    </dialog>
+
+    <dialog id="project-foundation-dialog" class="project-foundation-dialog" aria-labelledby="project-foundation-title">
+      <div class="project-foundation-shell">
+        <header class="project-foundation-header">
+          <div><span>DIRECTOR START</span><h2 id="project-foundation-title">项目视觉启动台</h2><p>先定叙事边界，再锁定可继承的视觉基准。</p></div>
+          <button id="foundation-close" type="button" class="icon-button" aria-label="关闭启动台" title="关闭启动台"><i data-lucide="x" aria-hidden="true"></i></button>
+        </header>
+        <ol class="foundation-progress" aria-label="启动步骤">
+          <li data-foundation-progress="brief" class="active"><span>01</span>创作简报</li>
+          <li data-foundation-progress="visual"><span>02</span>视觉基准</li>
+          <li data-foundation-progress="route"><span>03</span>制作入口</li>
+        </ol>
+        <p id="foundation-error" class="foundation-error" role="alert"></p>
+        <section data-foundation-step="brief" class="foundation-step active" aria-labelledby="foundation-brief-title">
+          <header><span>01 / BRIEF</span><h3 id="foundation-brief-title">先说明你要拍什么</h3></header>
+          <label class="foundation-field foundation-wide"><span>项目名称</span><input id="foundation-project-name" maxlength="60" placeholder="例如：雾港来信"></label>
+          <label class="foundation-field foundation-wide"><span>故事一句话</span><textarea id="foundation-story" rows="3" maxlength="280" placeholder="例如：一名失踪调查员在雨夜港口发现同伴留下的证物。"></textarea></label>
+          <div class="foundation-field-grid">
+            <label class="foundation-field"><span>发布平台</span><select id="foundation-platform"><option value="film">电影 / AIGC 短片</option><option value="short-video">短视频</option><option value="social">社交内容</option><option value="pitch">提案样片</option></select></label>
+            <label class="foundation-field"><span>时代</span><input id="foundation-era" maxlength="60" placeholder="例如：1990年代"></label>
+            <label class="foundation-field"><span>地域</span><input id="foundation-region" maxlength="60" placeholder="例如：北方沿海城市"></label>
+            <label class="foundation-field"><span>目标模型</span><input id="foundation-models" maxlength="120" placeholder="例如：Seedance, 即梦"></label>
+          </div>
+          <label class="foundation-field foundation-wide"><span>项目参考图</span><input id="foundation-reference-upload" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>仅保存在当前浏览器，最多 12 张。</small></label>
+          <div id="foundation-reference-list" class="foundation-reference-list" aria-label="项目参考图"></div>
+        </section>
+        <section data-foundation-step="visual" class="foundation-step" aria-labelledby="foundation-visual-title" hidden>
+          <header><span>02 / VISUAL BIBLE</span><h3 id="foundation-visual-title">建立项目视觉基准</h3></header>
+          <label class="foundation-field foundation-wide"><span>整体情绪</span><input id="foundation-mood" maxlength="80" placeholder="例如：压抑、克制、潮湿而缓慢的悬疑感"></label>
+          <div class="foundation-field-grid">
+            <label class="foundation-field"><span>色彩方向</span><textarea id="foundation-color" rows="4" maxlength="220" placeholder="主色、饱和度、冷暖关系"></textarea></label>
+            <label class="foundation-field"><span>光影方向</span><textarea id="foundation-lighting" rows="4" maxlength="220" placeholder="主光方向、反差、空气感"></textarea></label>
+            <label class="foundation-field"><span>摄影方向</span><textarea id="foundation-camera" rows="4" maxlength="220" placeholder="景别、焦段、机位与运动节奏"></textarea></label>
+            <label class="foundation-field"><span>材质方向</span><textarea id="foundation-material" rows="4" maxlength="220" placeholder="胶片、颗粒、皮肤、空间纹理"></textarea></label>
+          </div>
+          <label class="foundation-field foundation-wide"><span>避免出现</span><textarea id="foundation-negatives" rows="3" maxlength="360" placeholder="一条一行，例如：不要过曝；不要塑料皮肤；不要赛博霓虹"></textarea></label>
+        </section>
+        <section data-foundation-step="route" class="foundation-step" aria-labelledby="foundation-route-title" hidden>
+          <header><span>03 / ROUTE</span><h3 id="foundation-route-title">从哪里开始制作</h3></header>
+          <div class="foundation-route-grid" role="radiogroup" aria-label="优先制作入口">
+            <label><input type="radio" name="foundation-route" value="library"><span><b>资料检索</b><small>先浏览影调、导演与类型参考</small></span></label>
+            <label><input type="radio" name="foundation-route" value="casting"><span><b>角色定妆</b><small>先建立人物身份与定妆提示词</small></span></label>
+            <label><input type="radio" name="foundation-route" value="camera"><span><b>运镜</b><small>选择 15 秒或 30 秒运镜，规划角色表演与镜头调度</small></span></label>
+            <label><input type="radio" name="foundation-route" value="poster"><span><b>海报主视觉</b><small>先输出封面、片名与宣传图</small></span></label>
+            <label><input type="radio" name="foundation-route" value="music"><span><b>音乐配乐</b><small>先建立叙事音乐方向</small></span></label>
+          </div>
+        </section>
+        <footer class="project-foundation-footer">
+          <button id="foundation-professional" type="button" class="button secondary">进入专业模式</button>
+          <span></span>
+          <button id="foundation-back" type="button" class="button secondary">上一步</button>
+          <button id="foundation-skip" type="button" class="button secondary">跳过引导</button>
+          <button id="foundation-draft" type="button" class="button secondary">保存草案</button>
+          <button id="foundation-next" type="button" class="button primary">下一步</button>
+          <button id="foundation-lock" type="button" class="button primary" hidden>锁定视觉基准</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <main id="tone-workspace" class="app-shell workspace-view" data-workspace-view="tone" hidden>
+      <section class="project-context-strip" data-project-context="tone" aria-label="项目视觉基准" hidden></section>
+      <section class="library-pane" aria-label="素材库">
+        <header class="topbar">
+          <div>
+            <h1>影调库</h1>
+            <p>导演 / 类型 / 高级影调 / 中国影视 / 场景</p>
+          </div>
+          <div class="pane-head-actions">
+            <span id="count" class="count">0 条</span>
+            <button id="tone-library-collapse" type="button" class="icon-button pane-collapse" aria-label="折叠素材库" title="折叠素材库"><i data-lucide="panel-left-close" aria-hidden="true"></i></button>
+          </div>
+        </header>
+
+        <div class="search-row">
+          <label class="field">
+            <span>搜索</span>
+            <input id="search" type="search" placeholder="王家卫 雨夜 / P001 / 山海情 / 权谋 / 老宅">
+          </label>
+        </div>
+
+        <nav id="tabs" class="tabs" aria-label="分类"></nav>
+        <div class="filter-row">
+          <label class="field">
+            <span>导演国家/地区</span>
+            <select id="country-filter"></select>
+          </label>
+        </div>
+        <div id="results" class="results" aria-label="搜索结果"></div>
+      </section>
+
+      <section class="look-preview-pane" aria-label="影调视觉监看">
+        <header class="look-preview-toolbar">
+          <div>
+            <span>影调生成</span>
+            <strong>影调筛选与参考</strong>
+          </div>
+          <div class="look-preview-actions">
+            <button id="look-favorite" type="button" class="icon-button" aria-label="收藏当前影调" title="收藏当前影调"><i data-lucide="star" aria-hidden="true"></i></button>
+            <button id="look-save-version" type="button" class="button secondary"><i data-lucide="bookmark-plus" aria-hidden="true"></i>保存版本</button>
+          </div>
+        </header>
+
+        <div class="look-monitor" id="look-monitor">
+          <img id="look-preview-image" src="assets/tone-option2-hero.png" alt="香港雨夜霓虹电影影调参考画面">
+          <div class="look-monitor-grade" aria-hidden="true"></div>
+          <div class="look-monitor-vignette" aria-hidden="true"></div>
+          <div class="look-monitor-hud">
+            <span id="look-monitor-id">NO LOOK SELECTED</span>
+            <span>65MM · 2.39:1</span>
+          </div>
+          <div class="look-monitor-caption">
+            <span id="look-monitor-category">等待选择</span>
+            <strong id="look-monitor-name">从左侧选择一种影调</strong>
+            <p id="look-monitor-summary">这里会集中显示色彩倾向、光影关系、参考影片与提示词状态。</p>
+          </div>
+        </div>
+
+        <div class="look-compare-strip" aria-label="影调快速对比">
+          <div class="look-compare-head"><span>QUICK LOOKS</span><small>同一画面快速比较</small></div>
+          <div class="look-compare-frames">
+            <figure class="look-compare-frame is-primary">
+              <img src="assets/cinematic-control-room.jpg" alt="当前主影调预览">
+              <figcaption><b>A</b><span>主方案</span><small>PRIMARY</small></figcaption>
+            </figure>
+            <figure class="look-compare-frame is-muted">
+              <img src="assets/cinematic-control-room.jpg" alt="低饱和影调预览">
+              <figcaption><b>B</b><span>低饱和</span><small>MUTED</small></figcaption>
+            </figure>
+            <figure class="look-compare-frame is-contrast">
+              <img src="assets/cinematic-control-room.jpg" alt="高反差影调预览">
+              <figcaption><b>C</b><span>高反差</span><small>CONTRAST</small></figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="look-analysis" aria-label="影调视觉参数">
+          <div class="look-palette-block">
+            <span>主色板</span>
+            <div id="look-palette" class="look-palette" aria-label="当前影调色板"></div>
+          </div>
+          <div class="look-meter-grid">
+            <div><span>明暗</span><strong id="look-meter-exposure">中低调</strong></div>
+            <div><span>反差</span><strong id="look-meter-contrast">电影级</strong></div>
+            <div><span>色温</span><strong id="look-meter-temperature">冷暖平衡</strong></div>
+          </div>
+        </div>
+
+        <div class="look-dna-grid" aria-label="影调DNA">
+          <div><span>LIGHT</span><strong id="look-dna-light">等待选择光影</strong></div>
+          <div><span>CAMERA</span><strong id="look-dna-camera">等待选择镜头</strong></div>
+          <div><span>TEXTURE</span><strong id="look-dna-texture">等待选择材质</strong></div>
+          <div><span>USE CASE</span><strong id="look-dna-use">等待选择适用场景</strong></div>
+        </div>
+
+        <div class="look-reference-panel">
+          <div class="look-section-head"><span>参考影片</span><small id="look-reference-count">0 部</small></div>
+          <div id="look-reference-films" class="look-reference-films"><span class="look-empty">选择影调后显示</span></div>
+        </div>
+
+        <div class="look-version-panel">
+          <div class="look-section-head">
+            <span>版本与收藏</span>
+            <button id="look-favorites-filter" type="button" class="text-button"><i data-lucide="star" aria-hidden="true"></i>只看收藏</button>
+          </div>
+          <div id="look-version-list" class="look-version-list"><span class="look-empty">保存后可比较不同提示词方案</span></div>
+        </div>
+      </section>
+
+      <section class="composer-pane" aria-label="提示词组合">
+        <header class="composer-heading">
+          <div>
+            <h1>影调生成器</h1>
+            <p>组合主体、情绪与影调规则</p>
+          </div>
+          <button id="tone-history-toggle" type="button" class="button secondary" aria-expanded="false"><i data-lucide="history" aria-hidden="true"></i>历史记录</button>
+        </header>
+        <div class="toolbar">
+          <button id="tone-composer-collapse" type="button" class="icon-button pane-collapse" aria-label="折叠参数面板" title="折叠参数面板"><i data-lucide="panel-right-close" aria-hidden="true"></i></button>
+          <button id="random" type="button" class="button secondary">随机组合</button>
+          <button id="clear" type="button" class="button secondary">清空</button>
+          <button id="copy" type="button" class="button primary">复制</button>
+        </div>
+
+        <div class="transfer-row" aria-label="发送当前影调">
+          <span>发送当前影调</span>
+          <button id="tone-send-camera" type="button" class="button secondary">到运镜</button>
+          <button id="tone-send-poster" type="button" class="button secondary">到海报生图</button>
+        </div>
+        <p id="tone-validation" class="validation-message"></p>
+
+        <label class="field subject-field">
+          <span>主体</span>
+          <input id="subject" type="text" placeholder="场景、人物、动作">
+        </label>
+
+        <div class="field tone-selection-field">
+          <div class="tone-selection-head">
+            <span>影调选择</span>
+            <label class="toggle-control" for="tone-blend-toggle">
+              <input id="tone-blend-toggle" type="checkbox">
+              <span class="toggle-track" aria-hidden="true"><span></span></span>
+              <span>双影调混合</span>
+            </label>
+          </div>
+          <div id="selected" class="selected-list"></div>
+        </div>
+
+        <label class="field mood-field">
+          <span>情绪</span>
+          <input id="mood" type="text" placeholder="孤独、危险、怀旧">
+        </label>
+
+        <div id="mood-list" class="pill-list" aria-label="情绪快捷选择"></div>
+
+        <label class="field extra-field">
+          <span>补充</span>
+          <input id="extra" type="text" placeholder="真实电影摄影，宽银幕构图">
+        </label>
+
+        <div class="field negative-field">
+          <span>负面</span>
+          <div id="negatives" class="negative-grid"></div>
+        </div>
+
+        <label class="field output-field">
+          <span>结果</span>
+          <textarea id="output" rows="11" spellcheck="false"></textarea>
+        </label>
+      </section>
+    </main>
+
+    <main id="casting-workspace" class="casting-shell workspace-view" data-workspace-view="casting" hidden>
+      <section class="project-context-strip" data-project-context="casting" aria-label="项目视觉基准" hidden></section>
+      <aside class="casting-archive" aria-label="角色档案">
+        <header class="casting-archive-head">
+          <div><h1>角色档案</h1><p>角色资料 / 图片样板 / 提示词模板</p></div>
+          <button type="button" class="icon-button" title="新建角色" aria-label="新建角色"><i data-lucide="user-plus" aria-hidden="true"></i></button>
+        </header>
+
+        <section class="casting-roster" aria-labelledby="casting-roster-title">
+          <div class="casting-section-head"><strong id="casting-roster-title">项目角色</strong><span>5</span></div>
+          <div class="casting-roster-list">
+            <button type="button" class="casting-roster-item active">
+              <span class="casting-roster-placeholder">01</span>
+              <img id="casting-roster-current-image" alt="林岚角色身份缩略图" hidden>
+              <span><b id="casting-roster-current-id">CHAR-001</b><strong id="casting-roster-current-role">林岚 / 刑警队法医</strong><small id="casting-roster-current-status">三视图参考</small></span>
+            </button>
+            <button type="button" class="casting-roster-item" disabled><span class="casting-roster-placeholder">02</span><span><b>CHAR-002</b><strong>周峥 / 刑警队队长</strong><small>待建立身份母版</small></span></button>
+            <button type="button" class="casting-roster-item" disabled><span class="casting-roster-placeholder">03</span><span><b>CHAR-003</b><strong>陈默 / 痕检技术员</strong><small>待建立身份母版</small></span></button>
+            <button type="button" class="casting-roster-item" disabled><span class="casting-roster-placeholder">04</span><span><b>CHAR-004</b><strong>苏婉 / 法医助理</strong><small>待建立身份母版</small></span></button>
+            <button type="button" class="casting-roster-item" disabled><span class="casting-roster-placeholder">05</span><span><b>CHAR-005</b><strong>刘洋 / 现场勘查员</strong><small>待建立身份母版</small></span></button>
+          </div>
+        </section>
+
+        <section class="casting-archive-control">
+          <span class="section-label">角色建立方式</span>
+          <div class="segmented casting-source-switch" aria-label="角色建立方式">
+            <button type="button" class="segment active" data-casting-source="reference" aria-pressed="true">有参考图</button>
+            <button type="button" class="segment" data-casting-source="text" aria-pressed="false">文字新建角色</button>
+          </div>
+        </section>
+
+        <section class="casting-archive-control">
+          <span class="section-label">图片样板</span>
+          <div class="segmented casting-layout-switch" aria-label="角色图片样板">
+            <button type="button" class="segment" data-casting-layout="single" aria-pressed="false">单视图</button>
+            <button type="button" class="segment active" data-casting-layout="three" aria-pressed="true">三视图</button>
+            <button type="button" class="segment" data-casting-layout="four" aria-pressed="false">四视图</button>
+            <button type="button" class="segment" data-casting-layout="identity" aria-pressed="false">身份资料板</button>
+          </div>
+          <div id="casting-layout-preview" class="casting-board-preview" aria-label="版式比例预览"></div>
+        </section>
+      </aside>
+
+      <section id="casting-stage" class="casting-stage" aria-label="角色视觉参考与提示词模板">
+        <header class="casting-stage-head">
+          <div><span id="casting-stage-id">CHAR-001</span><h1 id="casting-stage-title">林岚 / 刑警队法医</h1></div>
+          <span id="casting-stage-status" class="casting-stage-status">三视图参考</span>
+        </header>
+
+        <figure class="casting-identity-board">
+          <input id="casting-reference-file" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp">
+          <img id="casting-template-sample" src="assets/casting-template-three.png?v=20260811-young-woman-v1" alt="三视图角色图片样板">
+          <div id="casting-reference-layer" class="casting-reference-layer">
+            <span>当前人物参考图</span>
+            <img id="casting-identity-board-image" alt="" hidden>
+            <div id="casting-upload-empty" class="casting-upload-empty">
+              <i data-lucide="image-up" aria-hidden="true"></i>
+              <strong>添加人物参考图</strong>
+              <span>JPG、PNG、WebP，单张不超过 15MB</span>
+              <button id="casting-select-image" type="button" class="button primary">选择参考图</button>
+            </div>
+            <p id="casting-upload-error" class="casting-upload-error" role="alert" hidden></p>
+            <div id="casting-asset-meta" class="casting-asset-meta" hidden>
+              <span id="casting-asset-summary"></span>
+              <button id="casting-replace-image" type="button" class="icon-button" title="替换参考图" aria-label="替换参考图"><i data-lucide="replace" aria-hidden="true"></i></button>
+              <button id="casting-remove-image" type="button" class="icon-button" title="删除参考图" aria-label="删除参考图"><i data-lucide="trash-2" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <figcaption id="casting-template-caption">
+            <span>正脸特写</span><span>45° 半身</span><span>正面全身</span>
+          </figcaption>
+        </figure>
+
+        <section class="casting-template-guide" aria-labelledby="casting-template-title">
+          <header>
+            <div><span>VISUAL TEMPLATE</span><h2 id="casting-template-title">三视图样板</h2></div>
+            <small id="casting-template-stage-label">角色定妆与比例确认</small>
+          </header>
+          <div class="casting-template-guide-grid">
+            <article><span>用途</span><p id="casting-template-purpose"></p></article>
+            <article><span>构图组成</span><p id="casting-template-composition"></p></article>
+            <article><span>使用阶段</span><p id="casting-template-stage"></p></article>
+          </div>
+        </section>
+        <div class="casting-version-compat" aria-hidden="true" hidden>
+          <span id="casting-version-count"></span>
+          <button id="casting-save-version" type="button"></button>
+          <div id="casting-version-strip"></div>
+        </div>
+      </section>
+
+      <section class="casting-inspector" aria-label="角色视觉资料与提示词模板">
+        <header class="casting-inspector-head">
+          <div><span>身份一致性</span><strong id="casting-status-value">三视图参考</strong></div>
+          <button id="casting-example" type="button" class="button secondary"><i data-lucide="wand-sparkles" aria-hidden="true"></i>载入示例</button>
+        </header>
+
+        <div class="casting-inspector-scroll">
+          <div class="casting-checklist" aria-label="母版锁定检查">
+            <span data-casting-check="role">角色</span><span data-casting-check="age">年龄</span><span data-casting-check="body">体型</span><span data-casting-check="face">脸部</span><span data-casting-check="hair">发型</span><span data-casting-check="costume">服装</span>
+          </div>
+          <p id="casting-validation" class="validation-message"></p>
+
+          <details class="casting-inspector-group" open>
+            <summary>角色信息</summary>
+            <div class="casting-fields">
+              <label class="field"><span>角色编号</span><input id="casting-id" type="text" value="CHAR-001" placeholder="CHAR-001"></label>
+              <label class="field"><span>角色姓名 / 身份</span><input id="casting-role" type="text" placeholder="林岚，刑警队法医"></label>
+              <label class="field"><span>年龄与性别</span><input id="casting-age" type="text" placeholder="38岁，中国女性"></label>
+              <label class="field"><span>体型与身材比例</span><input id="casting-body" type="text" placeholder="168cm，肩背挺直，匀称偏瘦，四肢比例自然"></label>
+              <label class="field field-span-2"><span>脸部身份锚点</span><textarea id="casting-face" rows="3" placeholder="填写脸宽、脸颊、下巴、发际线、眼距、眉形、鼻形、嘴唇与耳朵"></textarea></label>
+              <label class="field"><span>发型与发色</span><input id="casting-hair" type="text" placeholder="黑色齐肩直发，右侧分缝，少量碎发"></label>
+              <label class="field"><span>服装与鞋履</span><input id="casting-costume" type="text" placeholder="深灰风衣、白衬衫、黑色直筒裤、低跟皮鞋"></label>
+              <label class="field field-span-2"><span>固定身份特征与道具</span><input id="casting-traits" type="text" placeholder="左眉尾浅疤、银色腕表、法医证件"></label>
+            </div>
+          </details>
+
+          <details class="casting-inspector-group" id="casting-identity-details">
+            <summary>身份资料板内容</summary>
+            <div class="casting-fields">
+              <label class="field field-span-2"><span>服装层级与材质</span><textarea id="casting-wardrobe" rows="2" placeholder="内层、外套、下装、鞋履、面料、颜色、磨损与穿着状态"></textarea></label>
+              <label class="field field-span-2"><span>固定道具与佩戴位置</span><textarea id="casting-props" rows="2" placeholder="道具名称、材质、尺寸、使用痕迹、佩戴或携带位置"></textarea></label>
+              <label class="field"><span>常态表情</span><input id="casting-neutral-expression" type="text" placeholder="克制中性，眼神专注，下颌轻微收紧"></label>
+              <label class="field"><span>情绪表情组</span><input id="casting-expression-set" type="text" placeholder="警觉、轻微担忧、压抑愤怒、坚定"></label>
+              <label class="field"><span>标志性动作</span><input id="casting-signature-action" type="text" placeholder="俯身观察证物、整理手套、快速记录"></label>
+              <label class="field"><span>常用站姿与身体状态</span><input id="casting-stance" type="text" placeholder="肩背挺直、重心稳定、动作克制、职业警觉"></label>
+            </div>
+          </details>
+
+          <details class="casting-inspector-group">
+            <summary>年代与类型</summary>
+            <div class="casting-fields">
+              <label class="field"><span>视觉媒介</span><select id="casting-medium"><option value="live">真人写实电影</option><option value="animation-2d">电影级二维手绘动画</option><option value="animation-3d">电影级三维动画</option><option value="disney-2d">迪士尼经典二维动画</option><option value="pixar-3d">皮克斯式三维动画</option><option value="ghibli">吉卜力 / 宫崎骏手绘动画</option><option value="dreamworks">梦工厂式三维动画</option><option value="comic-hybrid">漫画混合动画</option><option value="anime-realistic">写实系日式动画</option><option value="animation-chinese">中国东方动画</option><option value="stop-motion">定格动画</option></select></label>
+              <label class="field"><span>故事年代</span><select id="casting-era"><option value="contemporary">当代现实</option><option value="future">近未来</option><option value="1990s">1990年代</option><option value="1980s">1980年代</option><option value="1960s">1960年代</option><option value="1940s">1940年代</option><option value="republican">中国民国时期</option><option value="qing">中国清代</option><option value="ming">中国明代</option><option value="song">中国宋代</option><option value="tang">中国唐代</option><option value="victorian">欧洲维多利亚时代</option><option value="medieval">欧洲中世纪</option><option value="ancient">架空古代</option></select></label>
+              <label class="field"><span>影片类型</span><select id="casting-genre"><option value="realism">现实主义</option><option value="crime">黑色犯罪</option><option value="suspense">悬疑心理</option><option value="romance">爱情文艺</option><option value="comedy">喜剧</option><option value="horror">恐怖惊悚</option><option value="scifi">硬核科幻</option><option value="cyberpunk">赛博朋克</option><option value="war">战争军事</option><option value="wuxia">武侠江湖</option><option value="court">历史宫廷</option><option value="western">西部荒漠</option><option value="fantasy">史诗奇幻</option><option value="youth">青春成长</option></select></label>
+              <label class="field"><span>类型影调</span><select id="casting-tone"></select></label>
+            </div>
+          </details>
+
+          <details class="casting-inspector-group">
+            <summary>皮肤与光照</summary>
+            <div class="casting-fields">
+              <label class="field"><span>皮肤状态</span><select id="casting-skin"><option value="dry">干燥低反光真实皮肤</option><option value="neutral">中性自然真实皮肤</option><option value="weathered">风吹日晒粗粝皮肤</option><option value="mature">成熟年龄纹理皮肤</option></select></label>
+              <label class="field"><span>白棚光影</span><select id="casting-lighting"><option value="soft">双层柔光标准定妆</option><option value="neutral">中性日光高还原</option><option value="warm">轻暖肤色定妆</option><option value="cool">轻冷克制定妆</option><option value="sculpted">柔和轮廓塑形</option></select></label>
+              <label class="field"><span>画面比例</span><select id="casting-ratio"><option value="4:5">4:5 竖向肖像</option><option value="3:4">3:4 竖向肖像</option><option value="16:9" selected>16:9 横向角色板</option><option value="3:2">3:2 摄影横幅</option><option value="4:3">4:3 标准横幅</option></select></label>
+            </div>
+          </details>
+
+          <details class="casting-inspector-group">
+            <summary>参考图保留策略</summary>
+            <div class="casting-fields">
+              <label class="field"><span>保留范围</span><select id="casting-reference"><option value="preserve-all">保留人物、发型、服装与配饰</option><option value="preserve-identity">保留人物和发型，按填写内容换装</option><option value="face-only">只锁脸，按文字重建体型与服装</option></select></label>
+              <label class="field field-span-2" id="casting-reference-notes-field"><span>参考图补充说明</span><textarea id="casting-reference-notes" rows="3" placeholder="严格保留脸、年龄、发型、服装与固定道具；未展示区域保守补全"></textarea></label>
+            </div>
+          </details>
+
+          <label class="field casting-output-field">
+            <span>角色视觉提示词模板</span>
+            <textarea id="casting-output" rows="16" spellcheck="false"></textarea>
+          </label>
+          <div class="casting-file-row"><span>建议文件名</span><code id="casting-filename">CHAR-001_角色名_白底三视图_v001_LOCKED.png</code></div>
+        </div>
+
+        <footer class="casting-inspector-footer">
+          <div class="casting-primary-actions"><button id="casting-clear" type="button" class="button secondary">清空</button><button id="casting-copy" type="button" class="button primary">复制提示词</button></div>
+          <div class="transfer-row" aria-label="发送当前角色"><button id="casting-send-camera" type="button" class="button secondary"><i data-lucide="video" aria-hidden="true"></i>到运镜</button><button id="casting-send-poster" type="button" class="button secondary"><i data-lucide="panels-top-left" aria-hidden="true"></i>到海报生图</button></div>
+        </footer>
+      </section>
+    </main>
+
+    <main id="poster-workspace" class="poster-shell poster-production-shell workspace-view" data-workspace-view="poster" hidden>
+      <section class="project-context-strip" data-project-context="poster" aria-label="项目视觉基准" hidden></section>
+      <section class="poster-template-panel" aria-label="海报视觉模板库">
+        <header class="poster-panel-header">
+          <div>
+            <span class="poster-kicker">KEY ART LIBRARY</span>
+            <h1>海报视觉模板</h1>
+          </div>
+          <span id="poster-template-count" class="poster-panel-count">09</span>
+        </header>
+
+        <div id="poster-library-view" class="poster-library-view-switch" role="tablist" aria-label="海报模板类型">
+          <button type="button" class="active" data-poster-library-view="composition" role="tab" aria-selected="true" aria-controls="poster-composition-library">构图模板</button>
+          <button type="button" data-poster-library-view="title" role="tab" aria-selected="false" aria-controls="poster-title-library">可编辑字体</button>
+          <button type="button" data-poster-library-view="title-mark" role="tab" aria-selected="false" aria-controls="poster-title-mark-library">AI字标生成</button>
+        </div>
+
+        <div id="poster-composition-library" class="poster-library-pane" role="tabpanel">
+          <div class="poster-purpose-tabs" role="group" aria-label="海报用途分类">
+            <button type="button" class="active" data-poster-purpose-group="film" aria-pressed="true">电影海报</button>
+            <button type="button" data-poster-purpose-group="social" aria-pressed="false">自媒体</button>
+            <button type="button" data-poster-purpose-group="product" aria-pressed="false">商品图</button>
+          </div>
+
+          <label class="field poster-purpose-field">
+            <span>具体成品用途</span>
+            <select id="poster-purpose">
+              <option value="film">电影正式海报</option>
+              <option value="series">剧集 / 短剧海报</option>
+              <option value="streaming">视频平台横版封面</option>
+              <option value="social">自媒体内容封面</option>
+              <option value="product">商品主视觉图</option>
+              <option value="event">活动与品牌主视觉</option>
+            </select>
+          </label>
+
+          <div id="poster-template-list" class="poster-template-list" role="listbox" aria-label="构图模板"></div>
+          <label class="poster-native-control" aria-hidden="true">
+            <span>当前构图</span>
+            <select id="poster-composition" tabindex="-1"></select>
+          </label>
+        </div>
+
+        <div id="poster-title-library" class="poster-library-pane poster-title-library" role="tabpanel" hidden>
+          <div id="poster-title-filters" class="poster-title-filters">
+            <div class="poster-title-filter-row" role="group" aria-label="标题字类型">
+              <button type="button" class="active" data-poster-title-category="all" aria-pressed="true">全部</button>
+              <button type="button" data-poster-title-category="modern" aria-pressed="false">现代</button>
+              <button type="button" data-poster-title-category="eastern" aria-pressed="false">历史东方</button>
+              <button type="button" data-poster-title-category="crime" aria-pressed="false">悬疑犯罪</button>
+              <button type="button" data-poster-title-category="scifi" aria-pressed="false">科幻</button>
+              <button type="button" data-poster-title-category="literary" aria-pressed="false">文艺</button>
+              <button type="button" data-poster-title-category="playful" aria-pressed="false">喜剧动画</button>
+            </div>
+            <div class="poster-title-filter-row poster-title-language-row" role="group" aria-label="标题语言">
+              <button type="button" data-poster-title-language="cn" aria-pressed="false">中文主标题</button>
+              <button type="button" data-poster-title-language="en" aria-pressed="false">英文主标题</button>
+              <button type="button" class="active" data-poster-title-language="bilingual" aria-pressed="true">中英双语</button>
+            </div>
+          </div>
+          <div id="poster-title-template-list" class="poster-title-template-list" role="listbox" aria-label="标题字模板"></div>
+        </div>
+
+        <div id="poster-title-mark-library" class="poster-library-pane poster-title-mark-library" role="tabpanel" hidden>
+          <div class="poster-title-mark-toolbar">
+            <label for="poster-title-mark-query">
+              <span>搜索片名字标</span>
+              <input id="poster-title-mark-query" type="search" maxlength="80" autocomplete="off" placeholder="片名、类型、材质或造字方法">
+            </label>
+            <button id="poster-title-mark-clear-query" type="button" title="清除搜索" aria-label="清除片名字标搜索">×</button>
+            <button id="poster-title-mark-favorites-only" type="button" aria-pressed="false" title="仅显示已收藏字标">★ <span>收藏</span></button>
+          </div>
+          <div id="poster-title-mark-filters" class="poster-title-mark-filters" role="group" aria-label="片名字标类型">
+            <button type="button" class="active" data-poster-title-mark-category="all" aria-pressed="true">全部</button>
+            <button type="button" data-poster-title-mark-category="eastern" aria-pressed="false">东方</button>
+            <button type="button" data-poster-title-mark-category="commercial" aria-pressed="false">商业</button>
+            <button type="button" data-poster-title-mark-category="crime" aria-pressed="false">悬疑</button>
+            <button type="button" data-poster-title-mark-category="scifi" aria-pressed="false">科幻</button>
+            <button type="button" data-poster-title-mark-category="retro" aria-pressed="false">年代</button>
+            <button type="button" data-poster-title-mark-category="epic" aria-pressed="false">史诗</button>
+            <button type="button" data-poster-title-mark-category="literary" aria-pressed="false">文艺</button>
+            <button type="button" data-poster-title-mark-category="romance" aria-pressed="false">爱情</button>
+            <button type="button" data-poster-title-mark-category="comedy" aria-pressed="false">喜剧</button>
+            <button type="button" data-poster-title-mark-category="horror" aria-pressed="false">恐怖</button>
+            <button type="button" data-poster-title-mark-category="fantasy" aria-pressed="false">奇幻</button>
+            <button type="button" data-poster-title-mark-category="minimal" aria-pressed="false">极简</button>
+          </div>
+          <div id="poster-title-mark-template-list" class="poster-title-mark-template-list" role="listbox" aria-label="AI片名字标模板"></div>
+          <div id="poster-title-mark-empty" class="poster-title-mark-empty" role="status" hidden>
+            <strong>没有符合条件的字标</strong>
+            <span>换一个关键词或关闭“仅看收藏”</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="poster-column-resizer" data-poster-resizer="left" role="separator" tabindex="0" aria-label="调整模板库宽度" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="430" aria-valuenow="320"></div>
+
+      <section class="poster-monitor-panel" aria-label="海报构图监看">
+        <header class="poster-monitor-header">
+          <div>
+            <span class="poster-kicker">COMPOSITION MONITOR</span>
+            <h2 id="poster-monitor-title">人物大脸主视觉</h2>
+            <p id="poster-monitor-context">电影海报 · 悬疑 / 人物 / 剧情</p>
+          </div>
+          <span id="poster-format-badge" class="poster-ratio-badge">2:3</span>
+        </header>
+
+        <div id="poster-ratio-switch" class="poster-ratio-switch" role="group" aria-label="海报画幅比例">
+          <button type="button" data-poster-ratio="2:3" aria-pressed="true">2:3</button>
+          <button type="button" data-poster-ratio="4:5" aria-pressed="false">4:5</button>
+          <button type="button" data-poster-ratio="9:16" aria-pressed="false">9:16</button>
+          <button type="button" data-poster-ratio="16:9" aria-pressed="false">16:9</button>
+          <button type="button" data-poster-ratio="3:2" aria-pressed="false">3:2</button>
+          <button type="button" data-poster-ratio="1:1" aria-pressed="false">1:1</button>
+        </div>
+        <label class="poster-native-control" aria-hidden="true">
+          <span>画面比例</span>
+          <select id="poster-ratio" tabindex="-1">
+            <option value="2:3">2:3 竖版电影海报</option>
+            <option value="16:9">16:9 横版视频封面</option>
+            <option value="4:5">4:5 社交媒体竖图</option>
+            <option value="1:1">1:1 方形封面</option>
+            <option value="9:16">9:16 手机竖屏海报</option>
+            <option value="3:2">3:2 横向商品图</option>
+          </select>
+        </label>
+
+        <div class="poster-compositor-toolbar" aria-label="海报画布工具">
+          <input id="poster-source-upload" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <button id="poster-source-replace" type="button" class="poster-tool-primary"><i data-lucide="image-up" aria-hidden="true"></i><span>上传海报</span></button>
+          <button id="poster-source-remove" type="button" title="移除当前海报" aria-label="移除当前海报" disabled><i data-lucide="trash-2" aria-hidden="true"></i></button>
+          <button id="poster-view-fit" type="button" title="适应窗口"><i data-lucide="scan" aria-hidden="true"></i><span>适应</span></button>
+          <button id="poster-view-100" type="button" title="按原始像素查看"><i data-lucide="maximize" aria-hidden="true"></i><span>100%</span></button>
+          <button id="poster-guides-toggle" type="button" aria-pressed="true" title="显示或隐藏安全区"><i data-lucide="grid-2x2" aria-hidden="true"></i><span>辅助线</span></button>
+          <span class="poster-tool-spacer"></span>
+          <button id="poster-undo" type="button" title="撤销" aria-label="撤销画布操作" disabled><i data-lucide="undo-2" aria-hidden="true"></i></button>
+          <button id="poster-redo" type="button" title="重做" aria-label="重做画布操作" disabled><i data-lucide="redo-2" aria-hidden="true"></i></button>
+        </div>
+
+        <div id="poster-preview" class="poster-preview poster-monitor-stage" aria-label="海报构图预览">
+          <div id="poster-monitor-canvas" class="poster-monitor-canvas"></div>
+          <div id="poster-compositor-stage" class="poster-compositor-stage" hidden>
+            <div id="poster-canvas-layer-switcher" class="poster-canvas-layer-switcher" role="group" aria-label="监视器图层选择">
+              <button id="poster-canvas-layer-cn" type="button" data-poster-canvas-layer="title-cn" aria-pressed="true"><span>中</span>中文片名</button>
+              <button id="poster-canvas-layer-en" type="button" data-poster-canvas-layer="title-en" aria-pressed="false"><span>EN</span>English</button>
+              <button id="poster-canvas-layer-image" type="button" data-poster-canvas-layer="title-image" aria-pressed="false"><span>PNG</span>字标</button>
+            </div>
+            <div id="poster-compositor-canvas-wrap" class="poster-compositor-canvas-wrap">
+              <canvas id="poster-compositor-canvas" aria-label="可编辑海报合成画布"></canvas>
+              <div class="poster-compositor-guides" aria-hidden="true"><span></span><span></span><i></i></div>
+            </div>
+          </div>
+          <label id="poster-compositor-empty" class="poster-compositor-empty" for="poster-source-upload">
+            <i data-lucide="image-plus" aria-hidden="true"></i>
+            <strong>上传自己的海报开始合成</strong>
+            <span>JPG / PNG / WebP，图片只保存在当前浏览器</span>
+          </label>
+        </div>
+
+        <div class="poster-compositor-statusbar" aria-live="polite">
+          <span id="poster-source-status">示例画面 · 尚未上传海报</span>
+          <span id="poster-layer-status">当前图层：中文片名</span>
+          <span id="poster-export-summary">上传后按原图尺寸导出</span>
+        </div>
+
+        <div id="poster-template-summary" class="poster-template-summary" aria-live="polite">
+          <article>
+            <span>视觉意图</span>
+            <strong id="poster-intent">用眼神和面部微表情建立视觉中心</strong>
+          </article>
+          <article>
+            <span>主体占比</span>
+            <strong id="poster-subject-ratio">人物占画面 55%–70%</strong>
+          </article>
+          <article>
+            <span>排版风险</span>
+            <strong id="poster-type-risk">标题避开眼睛和面部高光</strong>
+          </article>
+        </div>
+      </section>
+
+      <div class="poster-column-resizer" data-poster-resizer="right" role="separator" tabindex="0" aria-label="调整参数栏宽度" aria-orientation="vertical" aria-valuemin="420" aria-valuemax="620" aria-valuenow="500"></div>
+
+      <section class="poster-parameter-panel" aria-label="海报参数与提示词">
+        <div class="poster-toolbar">
+          <div class="poster-status">
+            <span>输出状态</span>
+            <strong id="poster-status-value">POSTER KEY ART</strong>
+          </div>
+          <button id="poster-example" type="button" class="button secondary" title="载入海报示例">示例</button>
+          <button id="poster-clear" type="button" class="button secondary" title="清空海报设置">清空</button>
+          <button id="poster-copy" type="button" class="button primary">复制提示词</button>
+        </div>
+
+        <div class="poster-source-block">
+          <span class="section-label">主体建立方式</span>
+          <div id="poster-source-switch" class="segmented poster-source-switch" aria-label="主体建立方式">
+            <button type="button" class="segment active" data-poster-source="reference">有参考图</button>
+            <button type="button" class="segment" data-poster-source="text">纯文字新建</button>
+          </div>
+          <p id="poster-source-note" class="poster-source-note">使用上传的角色图、商品图或构图图，锁定需要保留的内容。</p>
+        </div>
+
+        <div class="poster-parameter-scroll">
+          <details class="poster-parameter-group" data-poster-group="subject" open>
+            <summary><span>01</span><strong>主体</strong><small>人物、商品与视觉焦点</small></summary>
+            <div class="poster-group-fields poster-fields">
+              <label class="field">
+                <span>影片 / 内容类型</span>
+                <select id="poster-genre">
+                  <option value="drama">剧情现实</option><option value="crime">犯罪黑色</option><option value="suspense">悬疑推理</option><option value="horror">恐怖惊悚</option><option value="action">动作枪战</option><option value="scifi">科幻未来</option><option value="fantasy">史诗奇幻</option><option value="war">战争历史</option><option value="wuxia">武侠东方</option><option value="romance">爱情文艺</option><option value="comedy">喜剧</option><option value="youth">青春成长</option><option value="animation">动画电影</option><option value="documentary">纪录片</option><option value="commercial">商业产品</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>视觉重点</span>
+                <select id="poster-focus">
+                  <option value="face">人物脸与眼神</option><option value="silhouette">人物轮廓与姿态</option><option value="environment">宏大环境与尺度</option><option value="object">关键物件与符号</option><option value="product">商品外形与材质</option>
+                </select>
+              </label>
+              <label class="field field-span-2">
+                <span>主视觉主体</span>
+                <textarea id="poster-subject" rows="3" placeholder="一个女人站在被海雾吞没的旧码头，背后是巨大失事客轮轮廓"></textarea>
+              </label>
+              <label class="field field-span-2">
+                <span>参考图使用</span>
+                <select id="poster-reference">
+                  <option value="character">上传角色图，严格锁人物</option><option value="product">上传商品图，严格锁产品</option><option value="style">上传图片，只参考构图影调</option>
+                </select>
+              </label>
+            </div>
+          </details>
+
+          <details class="poster-parameter-group" data-poster-group="scene" open>
+            <summary><span>02</span><strong>场景</strong><small>时代、空间与关键元素</small></summary>
+            <div class="poster-group-fields poster-fields">
+              <label class="field field-span-2">
+                <span>环境、时代与关键元素</span>
+                <textarea id="poster-environment" rows="3" placeholder="1990年代北方港口，冬夜，铁锈、海雾、冷白探照灯、红色救生圈"></textarea>
+              </label>
+            </div>
+          </details>
+
+          <details class="poster-parameter-group" data-poster-group="look" open>
+            <summary><span>03</span><strong>影调与光影</strong><small>单一影调、主光与色彩关系</small></summary>
+            <div class="poster-group-fields poster-fields">
+              <label class="field field-span-2">
+                <span>从影调工作台继承</span>
+                <textarea id="poster-look" rows="3" placeholder="可从影调工作台一键发送，也可以手动填写统一影调规则"></textarea>
+              </label>
+              <label class="field">
+                <span>海报影调</span>
+                <select id="poster-tone"></select>
+              </label>
+              <label class="field">
+                <span>电影布光方式</span>
+                <select id="poster-lighting">
+                  <option value="genre">跟随类型影调</option><option value="rembrandt">伦勃朗光</option><option value="side">侧光 / 半明半暗</option><option value="backlight">逆光 / 轮廓光</option><option value="silhouette">剪影逆光</option><option value="chiaroscuro">明暗对照 / 黑色电影</option><option value="top">顶光 / 压迫感</option><option value="under">底光 / 异常感</option><option value="window">窗光 / 百叶窗影</option><option value="practical">场景光源 / 动机光</option><option value="soft">大面积柔光</option><option value="hard">硬质日光</option><option value="highkey">高调均匀光</option><option value="lowkey">低调局部光</option><option value="neon">霓虹混合光</option><option value="volumetric">体积光 / 穿透光束</option>
+                </select>
+              </label>
+              <label class="field field-span-2">
+                <span>电影色彩关系</span>
+                <select id="poster-color-grade">
+                  <option value="genre">跟随类型影调</option><option value="warmcool">冷暖对比</option><option value="tealorange">青橙互补</option><option value="blueamber">蓝调与琥珀</option><option value="redcyan">红青对立</option><option value="redgreen">红绿心理对比</option><option value="monochrome">单色统一</option><option value="desaturated">低饱和去色</option><option value="bleach">漂白旁路质感</option><option value="warm">暖金与琥珀</option><option value="cold">冷蓝灰</option><option value="blackred">黑白红强调</option><option value="earth">大地色与军绿</option><option value="pastel">柔和粉彩</option><option value="jewel">宝石色 / 高贵浓郁</option>
+                </select>
+              </label>
+            </div>
+          </details>
+
+          <details class="poster-parameter-group" data-poster-group="typography" open>
+            <summary><span>04</span><strong>标题字设计</strong><small>中英标题系统、材质与安全区</small></summary>
+            <div class="poster-group-fields poster-fields">
+              <label class="field"><span>文字生成方式</span><select id="poster-text-mode"><option value="reserved">无字底图，保留排版区</option><option value="direct">直接生成标题文字</option><option value="visual-only">纯主视觉，不留文字</option></select></label>
+              <label class="field"><span>标题语言模式</span><select id="poster-title-language"><option value="cn">中文主标题</option><option value="en">英文主标题</option><option value="bilingual" selected>中英双语</option></select></label>
+              <div class="poster-title-selection field-span-2">
+                <span>当前标题系统</span>
+                <strong id="poster-title-template-summary">新宋体作者电影</strong>
+                <small id="poster-title-references">参考观察：《好东西》(2024) · 《走走停停》(2024) · 《爱情神话》(2021)</small>
+              </div>
+              <label class="field"><span>标题材质</span><select id="poster-title-material"></select></label>
+              <label class="field"><span>自定义字体方向</span><select id="poster-font"><option value="serif">电影衬线标题</option><option value="condensed">高窄无衬线标题</option><option value="bold">粗黑无衬线标题</option><option value="song">中文宋体电影标题</option><option value="calligraphy">东方书法标题</option><option value="handwritten">手写文艺标题</option><option value="geometric">科幻几何标题</option><option value="horror">残缺惊悚标题</option><option value="playful">活泼喜剧标题</option></select></label>
+              <label class="field"><span>标题位置</span><select id="poster-title-position"><option value="bottom">底部主标题</option><option value="top">顶部主标题</option><option value="center">中央压图标题</option><option value="side">侧边竖排标题</option><option value="negative-space">放入留白区域</option></select></label>
+              <label class="field"><span>字体颜色</span><select id="poster-text-color"><option value="white">白色 / 暖白</option><option value="black">黑色 / 墨黑</option><option value="red">电影红</option><option value="gold">暗金 / 金色</option><option value="cyan">冷青 / 冰蓝</option><option value="auto">根据背景自动反差</option></select></label>
+              <label class="field field-span-2"><span>主标题（支持空格与回车换行）</span><textarea id="poster-title" rows="2" placeholder="迷雾码头"></textarea></label>
+              <label class="field field-span-2"><span>英文标题 / 英文伴随标题（支持换行）</span><textarea id="poster-english-title" rows="2" placeholder="THE SILENT HARBOR"></textarea></label>
+              <label class="field field-span-2"><span>副标题 / 宣传语</span><input id="poster-tagline" type="text" placeholder="真相沉在雾里，所有人都在岸上说谎"></label>
+              <label class="field field-span-2"><span>附加文字层级</span><input id="poster-credits" type="text" placeholder="主演姓名、导演、上映日期、平台角标或商品卖点"></label>
+            </div>
+          </details>
+
+          <details class="poster-parameter-group poster-title-mark-controls" data-poster-group="title-mark" hidden open>
+            <summary><span>05</span><strong>AI片名字标设计</strong><small>字形、造字、材质与独立资产</small></summary>
+            <div class="poster-group-fields poster-fields">
+              <div class="poster-title-mark-selection field-span-2">
+                <span>当前字标系统</span>
+                <strong id="poster-title-mark-summary">东方冷峻衬线</strong>
+                <small>合成示意，不代表模型最终生成结果</small>
+              </div>
+              <label class="field"><span>字标类型</span><select id="poster-title-mark-category"><option value="all">全部类型</option><option value="eastern">东方书法</option><option value="commercial">现代商业</option><option value="crime">悬疑犯罪</option><option value="scifi">科幻未来</option><option value="retro">年代复古</option><option value="epic">战争史诗</option><option value="literary">文艺手写</option><option value="romance">爱情青春</option><option value="comedy">喜剧活力</option><option value="horror">恐怖惊悚</option><option value="fantasy">奇幻动画</option><option value="minimal">极简概念</option></select></label>
+              <label class="field"><span>字形骨架</span><select id="poster-title-mark-skeleton"></select></label>
+              <div class="field field-span-2"><span>造字方法（最多三项）</span><div id="poster-title-mark-methods" class="poster-title-mark-methods" role="group" aria-label="造字方法"></div></div>
+              <label class="field field-span-2"><span>图形隐喻（建议一个）</span><input id="poster-title-mark-metaphor" type="text" placeholder="例如：码头地平线、门缝、山脉或星轨"></label>
+              <label class="field"><span>材质字效</span><select id="poster-title-mark-material"></select></label>
+              <label class="field"><span>字标光影</span><select id="poster-title-mark-lighting"></select></label>
+              <label class="field"><span>输出背景</span><select id="poster-title-mark-background"></select></label>
+              <label class="field"><span>输出模式</span><select id="poster-title-mark-output-mode"><option value="asset">独立字标资产</option><option value="composite">海报合成描述</option></select></label>
+              <p id="poster-title-mark-warning" class="poster-title-mark-warning field-span-2" role="status"></p>
+            </div>
+          </details>
+
+          <details class="poster-parameter-group poster-compositor-controls" data-poster-group="compositor" open>
+            <summary><span>06</span><strong>标题合成</strong><small>本地画布、独立图层与高清下载</small></summary>
+            <div class="poster-group-fields poster-compositor-fields">
+              <div id="poster-layer-list" class="poster-layer-list field-span-2" role="listbox" aria-label="海报文字与字标图层">
+                <button id="poster-layer-title-cn" type="button" data-poster-layer="title-cn" role="option" aria-selected="true"><span>中</span><strong>中文片名</strong><small>可双击编辑</small></button>
+                <button id="poster-layer-title-en" type="button" data-poster-layer="title-en" role="option" aria-selected="false"><span>EN</span><strong>英文副标</strong><small>独立移动</small></button>
+                <button id="poster-layer-title-image" type="button" data-poster-layer="title-image" role="option" aria-selected="false"><span>PNG</span><strong>透明字标</strong><small>等待上传</small></button>
+              </div>
+
+              <div class="poster-add-text-row field-span-2">
+                <label><span>新增内容</span><select id="poster-add-text-role"><option value="tagline">宣传语</option><option value="cast">演员姓名</option><option value="date">上映日期</option><option value="credits">演职员表</option><option value="custom">自定义文字</option></select></label>
+                <button id="poster-add-text" type="button"><i data-lucide="plus" aria-hidden="true"></i><span>添加文字</span></button>
+              </div>
+
+              <div class="poster-layer-actions field-span-2" role="group" aria-label="当前图层操作">
+                <button id="poster-layer-edit-text" type="button"><i data-lucide="text-cursor-input" aria-hidden="true"></i><span>编辑文字</span></button>
+                <button id="poster-layer-line-break" type="button"><i data-lucide="corner-down-left" aria-hidden="true"></i><span>换行</span></button>
+                <button id="poster-layer-visible" type="button" aria-pressed="true"><i data-lucide="eye" aria-hidden="true"></i><span>显示</span></button>
+                <button id="poster-layer-locked" type="button" aria-pressed="false"><i data-lucide="unlock" aria-hidden="true"></i><span>锁定位置</span></button>
+                <button id="poster-layer-reset" type="button"><i data-lucide="rotate-ccw" aria-hidden="true"></i><span>复位</span></button>
+              </div>
+
+              <div class="poster-layer-nudge field-span-2" role="group" aria-label="微调当前图层位置">
+                <button id="poster-layer-nudge-left" type="button" data-poster-layer-nudge="left" title="向左移动" aria-label="向左移动"><i data-lucide="arrow-left" aria-hidden="true"></i></button>
+                <button id="poster-layer-nudge-up" type="button" data-poster-layer-nudge="up" title="向上移动" aria-label="向上移动"><i data-lucide="arrow-up" aria-hidden="true"></i></button>
+                <button id="poster-layer-nudge-down" type="button" data-poster-layer-nudge="down" title="向下移动" aria-label="向下移动"><i data-lucide="arrow-down" aria-hidden="true"></i></button>
+                <button id="poster-layer-nudge-right" type="button" data-poster-layer-nudge="right" title="向右移动" aria-label="向右移动"><i data-lucide="arrow-right" aria-hidden="true"></i></button>
+              </div>
+
+              <label class="field field-span-2 poster-text-layer-field poster-layer-text-field"><span>当前图层文字（支持空格与回车）</span><textarea id="poster-layer-text" rows="3" spellcheck="false" placeholder="在这里输入海报文字"></textarea></label>
+
+              <label class="field"><span>字号 / 图层宽度</span><input id="poster-layer-size" type="range" min="2" max="120" step="1" value="56"></label>
+              <label class="field poster-text-layer-field"><span>当前图层字体样式</span><select id="poster-layer-font-style"><option value="serif">电影衬线</option><option value="condensed">高窄无衬线</option><option value="bold">粗黑无衬线</option><option value="song">中文宋体</option><option value="calligraphy">东方书法</option><option value="handwritten">手写文艺</option><option value="geometric">科幻几何</option><option value="horror">惊悚衬线</option><option value="playful">活泼喜剧</option></select></label>
+              <label class="field poster-text-layer-field"><span>文字颜色</span><input id="poster-layer-color" type="color" value="#f7f3e8"></label>
+
+              <div class="poster-layer-secondary-actions field-span-2">
+                <button id="poster-layer-duplicate" type="button"><i data-lucide="copy-plus" aria-hidden="true"></i><span>复制图层</span></button>
+                <button id="poster-layer-delete" type="button"><i data-lucide="trash-2" aria-hidden="true"></i><span>删除图层</span></button>
+              </div>
+
+              <div class="poster-title-asset-row field-span-2">
+                <input id="poster-title-asset-upload" type="file" accept="image/png" hidden>
+                <button type="button" data-poster-title-asset-action="upload"><i data-lucide="upload" aria-hidden="true"></i><span>上传透明字标 PNG</span></button>
+                <button id="poster-title-asset-remove" type="button" title="删除透明字标" disabled><i data-lucide="trash-2" aria-hidden="true"></i></button>
+              </div>
+
+              <label class="field poster-text-layer-field"><span>字距</span><input id="poster-layer-letter-spacing" type="range" min="-200" max="1000" step="10" value="0"></label>
+              <label class="field poster-text-layer-field"><span>行距</span><input id="poster-layer-line-height" type="range" min="70" max="300" step="5" value="105"></label>
+              <label class="field poster-text-layer-field"><span>对齐</span><select id="poster-layer-align"><option value="left">左对齐</option><option value="center">居中</option><option value="right">右对齐</option></select></label>
+              <label class="field"><span>旋转</span><input id="poster-layer-rotation" type="number" min="-180" max="180" step="1" value="0"></label>
+              <label class="field"><span>透明度</span><input id="poster-layer-opacity" type="range" min="0" max="100" step="1" value="100"></label>
+
+              <div class="poster-position-actions field-span-2" role="group" aria-label="快速定位当前图层">
+                <button id="poster-position-top" type="button" data-poster-position="top">顶部</button>
+                <button id="poster-position-center" type="button" data-poster-position="center">中央</button>
+                <button id="poster-position-bottom" type="button" data-poster-position="bottom">底部</button>
+                <button id="poster-position-left-bottom" type="button" data-poster-position="left-bottom">左下</button>
+                <button id="poster-position-right-bottom" type="button" data-poster-position="right-bottom">右下</button>
+              </div>
+
+              <div class="poster-download-row field-span-2">
+                <label><span>下载格式</span><select id="poster-export-format"><option value="png">PNG 无损</option><option value="jpg">JPG 高质量</option></select></label>
+                <button id="poster-download" type="button" class="button primary" disabled><i data-lucide="download" aria-hidden="true"></i><span>下载原图</span></button>
+              </div>
+              <p class="poster-local-privacy field-span-2">海报与字标只保存在当前浏览器，不上传服务器；项目文件仅记录本机资产编号。</p>
+            </div>
+          </details>
+
+          <div class="poster-output-block">
+            <div class="poster-checklist">
+              <span data-poster-check="subject">主体明确</span><span data-poster-check="environment">环境明确</span><span data-poster-check="lighting">光源清楚</span><span data-poster-check="tone">影调统一</span><span data-poster-check="title">标题设置</span><span data-poster-check="reference">参考模式</span>
+            </div>
+            <p id="poster-validation" class="validation-message"></p>
+            <label class="field poster-output-field">
+              <span id="poster-output-label">海报生图固定提示词</span>
+              <textarea id="poster-output" rows="22" spellcheck="false"></textarea>
+            </label>
+            <div class="poster-file-row"><span>建议文件名</span><code id="poster-filename">POSTER_项目名_电影海报_2x3_v001.png</code></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <main id="reverse-workspace" class="reverse-shell reverse-production-shell workspace-view" data-workspace-view="reverse" hidden>
+      <section class="project-context-strip" data-project-context="reverse" aria-label="项目视觉基准" hidden></section>
+      <section class="reverse-reference-panel" aria-label="参考画面与任务设置">
+        <header class="reverse-panel-header">
+          <div>
+            <h1>参考画面反推工作台</h1>
+            <p>参考图、任务边界与替换要求</p>
+          </div>
+          <span id="reverse-reference-status" class="reverse-panel-status">等待参考图</span>
+        </header>
+
+        <label class="field">
+          <span>图片使用方式</span>
+          <select id="reverse-source-mode">
+            <option value="target">我会在目标AI中上传参考图</option>
+            <option value="local">先在本地选择图片做项目记录</option>
+          </select>
+        </label>
+
+        <div class="reverse-upload-board">
+          <label class="reverse-upload" for="reverse-image-input">
+            <input id="reverse-image-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            <img id="reverse-image-preview" alt="本地参考画面预览" hidden>
+            <span id="reverse-image-placeholder">选择本地参考图片</span>
+          </label>
+          <p id="reverse-privacy-note" class="reverse-privacy-note">本地选图只用于当前浏览器预览，不上传服务器，也不会写入项目备份。</p>
+        </div>
+
+        <div class="reverse-task-settings">
+          <label class="field">
+            <span>反推用途</span>
+            <select id="reverse-purpose">
+              <option value="film">真人电影画面</option>
+              <option value="poster">电影海报</option>
+              <option value="portrait">人物肖像 / 定妆</option>
+              <option value="scene">环境场景</option>
+              <option value="product">商品与商业视觉</option>
+              <option value="animation">动画与插画画面</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>复刻强度</span>
+            <select id="reverse-fidelity">
+              <option value="balanced">保留视觉规律，替换具体内容</option>
+              <option value="close">尽量接近构图与光色</option>
+              <option value="inspired">只提取风格灵感</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>重点加强</span>
+            <select id="reverse-emphasis">
+              <option value="all">八个维度均衡</option>
+              <option value="composition">构图与镜头</option>
+              <option value="lighting">光线与色彩</option>
+              <option value="subject">主体与材质</option>
+              <option value="background">风格与背景</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>目标画面比例</span>
+            <select id="reverse-ratio">
+              <option value="source">沿用参考图比例</option>
+              <option value="16:9">16:9 电影横幅</option>
+              <option value="2.39:1">2.39:1 宽银幕</option>
+              <option value="2:3">2:3 电影海报</option>
+              <option value="4:5">4:5 社交竖图</option>
+              <option value="1:1">1:1 方形</option>
+              <option value="9:16">9:16 手机竖屏</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>画面完成度</span>
+            <select id="reverse-quality">
+              <option value="cinematic">真人电影摄影质感</option>
+              <option value="imax">IMAX大画幅胶片质感</option>
+              <option value="commercial">高端商业广告质感</option>
+              <option value="documentary">自然纪实质感</option>
+              <option value="animation">电影动画完成度</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>文字处理</span>
+            <select id="reverse-text-policy">
+              <option value="remove">不复刻文字、Logo与水印</option>
+              <option value="reserve">只保留文字版式留白</option>
+              <option value="describe">分析文字层级但不照抄内容</option>
+            </select>
+          </label>
+          <label class="field field-span-2">
+            <span>主体替换要求</span>
+            <textarea id="reverse-replacement" rows="3" placeholder="例如：保留构图和光影，把画面中的男性替换为38岁中国女刑警，深灰风衣，克制警觉"></textarea>
+          </label>
+          <label class="field field-span-2">
+            <span>补充要求</span>
+            <input id="reverse-extra" type="text" placeholder="例如：真实皮肤、不要AI感、雨夜环境、标题放在底部留白区">
+          </label>
+        </div>
+      </section>
+
+      <div class="reverse-column-separator" data-reverse-resizer="left" role="separator" aria-orientation="vertical"></div>
+
+      <section class="reverse-analysis-panel" aria-label="八维人工校准">
+        <header class="reverse-panel-header">
+          <div>
+            <h2>八维人工校准</h2>
+            <p>把可见证据转成可执行参数</p>
+          </div>
+          <strong id="reverse-calibration-count" class="reverse-panel-status">0 / 8</strong>
+        </header>
+        <button id="reverse-clear-dimensions" type="button" class="button secondary">清空八维</button>
+
+        <div id="reverse-dimension-grid" aria-label="八维分析输入">
+          <label class="reverse-dimension-field">
+            <span>主体特征</span>
+            <small>标准：数量、身份、比例、动作与表情</small>
+            <textarea data-reverse-dimension="subject" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>构图方式</span>
+            <small>标准：布局、留白、动线与空间层级</small>
+            <textarea data-reverse-dimension="composition" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>镜头角度</span>
+            <small>标准：景别、机位、焦段感与景深</small>
+            <textarea data-reverse-dimension="camera" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>光线方向</span>
+            <small>标准：主光、光比、软硬与投影</small>
+            <textarea data-reverse-dimension="lighting" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>色彩搭配</span>
+            <small>标准：主辅色、冷暖、面积与饱和度</small>
+            <textarea data-reverse-dimension="color" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>材质细节</span>
+            <small>标准：皮肤、布料、金属与真实瑕疵</small>
+            <textarea data-reverse-dimension="material" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>画面风格</span>
+            <small>标准：媒介、年代、类型与成像质感</small>
+            <textarea data-reverse-dimension="style" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+          <label class="reverse-dimension-field">
+            <span>背景元素</span>
+            <small>标准：地点、天气、道具与叙事层级</small>
+            <textarea data-reverse-dimension="background" rows="5" placeholder="观察证据：……&#10;可执行参数：……"></textarea>
+          </label>
+        </div>
+      </section>
+
+      <div class="reverse-column-separator" data-reverse-resizer="right" role="separator" aria-orientation="vertical"></div>
+
+      <section class="reverse-result-panel" aria-label="反推提示词输出">
+        <header class="reverse-toolbar">
+          <div class="reverse-status">
+            <span>输出结构</span>
+            <strong>ANALYZE → REBUILD</strong>
+          </div>
+          <button id="reverse-example" type="button" class="button secondary">载入示例</button>
+          <button id="reverse-clear" type="button" class="button secondary">清空</button>
+          <button id="reverse-copy" type="button" class="button primary">复制反推指令</button>
+        </header>
+
+        <div class="reverse-result-status">
+          <p id="reverse-validation" class="validation-message ready">可以复制；请同时在目标AI中上传参考图片。</p>
+          <p class="reverse-calibration-summary">人工校准 <strong>0 / 8</strong>，未校准维度会使用参考图分析任务。</p>
+        </div>
+
+        <label class="field reverse-output-field">
+          <span>八维画面反推固定指令</span>
+          <textarea id="reverse-output" rows="28" spellcheck="false"></textarea>
+        </label>
+
+        <div class="reverse-file-row">
+          <span>项目记录</span>
+          <code id="reverse-filename">REVERSE_参考画面_八维反推_v001.txt</code>
+        </div>
+      </section>
+    </main>
+
+    <main id="camera-workspace" class="camera-shell workspace-view" data-workspace-view="camera" hidden>
+      <section class="project-context-strip" data-project-context="camera" aria-label="项目视觉基准" hidden></section>
+      <section class="camera-library" aria-label="大师级运镜库">
+        <header class="topbar camera-topbar">
+          <div>
+            <h1>大师运镜库</h1>
+            <p>案例机制 / 类型模板</p>
+          </div>
+          <span id="camera-count" class="count">0 条</span>
+        </header>
+
+        <div class="search-row camera-search-row">
+          <label class="field">
+            <span>搜索影片、类型、调度或光影</span>
+            <input id="camera-search" type="search" placeholder="教父 / 悬疑 / 缓慢推进 / 雨夜">
+          </label>
+          <div id="camera-source-tabs" class="segmented" aria-label="运镜来源">
+            <button type="button" class="segment active" data-source="cases">大师案例</button>
+            <button type="button" class="segment" data-source="genres">类型模板</button>
+          </div>
+        </div>
+
+        <label class="field camera-filter-field">
+          <span>调度分类</span>
+          <select id="camera-group-filter"></select>
+        </label>
+        <div id="camera-results" class="camera-results" aria-label="运镜搜索结果"></div>
+      </section>
+
+      <div id="camera-library-resizer" class="camera-column-resizer" data-camera-resizer="library" role="separator" aria-label="调整大师运镜库宽度" aria-orientation="vertical" aria-valuemin="280" aria-valuemax="600" aria-valuenow="350" tabindex="0" title="拖动调整宽度，双击恢复默认"></div>
+
+      <section id="camera-stage" class="camera-stage" aria-label="镜头监看与时间轴">
+        <header class="camera-stage-toolbar">
+          <div id="camera-selection" class="camera-selection empty-selection">尚未选择运镜案例</div>
+          <div class="camera-stage-actions">
+            <div id="camera-aspect-switch" class="camera-aspect-switch" aria-label="监视器画幅">
+              <button type="button" class="active" data-camera-aspect="cinema" aria-pressed="true">21:9</button>
+              <button type="button" data-camera-aspect="wide" aria-pressed="false">16:9</button>
+            </div>
+            <button id="camera-blocking-toggle" type="button" class="button secondary" aria-expanded="false" aria-controls="camera-blocking-map" hidden>
+              <i data-lucide="route" aria-hidden="true"></i>调度地图
+            </button>
+            <button id="camera-save-version" type="button" class="button secondary">
+              <i data-lucide="bookmark-plus" aria-hidden="true"></i>保存版本
+            </button>
+          </div>
+        </header>
+
+        <figure id="camera-monitor" class="camera-monitor">
+          <img id="camera-monitor-image" src="assets/tone-option2-hero.png" alt="当前运镜电影监看画面">
+          <figcaption>
+            <span id="camera-monitor-id">SHOT -- · PRIMARY CAMERA</span>
+            <span>65MM · <span id="camera-monitor-aspect-label">21:9</span></span>
+          </figcaption>
+        </figure>
+
+        <section class="camera-timeline-panel" aria-labelledby="camera-timeline-title">
+          <header>
+            <div><span id="camera-duration-kicker">15 SECOND SHOT</span><h2 id="camera-timeline-title">0–15秒镜头节奏</h2></div>
+            <small>连续长镜头 · 无剪切</small>
+          </header>
+          <div id="camera-timeline" class="camera-timeline" aria-live="polite"></div>
+        </section>
+
+        <section id="camera-blocking-map" class="camera-blocking-map" aria-label="高级调度地图" hidden></section>
+      </section>
+
+      <div id="camera-composer-resizer" class="camera-column-resizer" data-camera-resizer="composer" role="separator" aria-label="调整镜头生成器宽度" aria-orientation="vertical" aria-valuemin="360" aria-valuemax="700" aria-valuenow="520" tabindex="0" title="拖动调整宽度，双击恢复默认"></div>
+
+      <section class="camera-composer" aria-label="镜头提示词生成">
+        <header class="camera-composer-head">
+          <div><h1>镜头生成器</h1><p>角色、场景、表演与镜头规则</p></div>
+          <div class="camera-mode-controls">
+            <div class="segmented camera-duration-tabs" aria-label="镜头时长">
+              <button type="button" class="segment active" data-camera-duration="15">15秒运镜</button>
+              <button type="button" class="segment camera-seedance-mode" data-camera-duration="30">30秒运镜</button>
+            </div>
+            <div id="camera-15s-structure" class="segmented camera-15s-structure" aria-label="提示词结构">
+              <button type="button" class="segment active" data-camera-structure="quick">快速复刻</button>
+              <button type="button" class="segment" data-camera-structure="formal">正式结构</button>
+            </div>
+          </div>
+        </header>
+
+        <div class="camera-composer-scroll">
+          <div class="camera-form-grid">
+            <label class="field">
+              <span>角色与参考图</span>
+              <input id="camera-character" type="text" placeholder="引用已上传女调查员参考图，锁定脸、年龄、服装">
+            </label>
+            <label class="field">
+              <span>场景与年代</span>
+              <input id="camera-scene" type="text" placeholder="1990年代北方火车站候车室，冬夜">
+            </label>
+            <label class="field field-span-2">
+              <span>从影调工作台继承</span>
+              <textarea id="camera-look" rows="3" placeholder="可从影调工作台一键发送，也可以手动填写本镜统一影调"></textarea>
+            </label>
+            <label class="field">
+              <span>人物情绪与表演</span>
+              <input id="camera-performance" type="text" placeholder="克制怀疑，先停顿、吞咽，再抬眼确认">
+            </label>
+            <label class="field">
+              <span>剧情动作与关键物件</span>
+              <input id="camera-action" type="text" placeholder="发现红色纤维，意识到同伴背叛，手缓慢离开证物袋">
+            </label>
+            <label class="field">
+              <span>声音</span>
+              <input id="camera-sound" type="text" value="不要背景音乐，只保留环境声、动作声、呼吸与空间混响；无字幕">
+            </label>
+            <label class="field">
+              <span>结尾衔接</span>
+              <input id="camera-ending" type="text" placeholder="15秒停在人物做出决定前，为下一镜保留动作">
+            </label>
+            <section id="camera-seedance30-beats" class="camera-seedance30-beats field-span-2" hidden aria-label="30秒导演长镜头节拍">
+              <header><span>30秒导演长镜头节拍</span><small>连续一镜到底 · 三段推进</small></header>
+              <label class="field"><span>0–10秒｜建立</span><textarea id="camera-beat-start" rows="2" placeholder="建立人物、空间、起始构图和情绪压力；摄影机如何开始进入"></textarea></label>
+              <label class="field"><span>10–20秒｜推进</span><textarea id="camera-beat-middle" rows="2" placeholder="触发事件、人物动作与摄影机推进如何同步；保持空间关系连续"></textarea></label>
+              <label class="field"><span>20–30秒｜落点</span><textarea id="camera-beat-end" rows="2" placeholder="信息或情绪落点；明确人物位置、视线、动作和摄影机最终构图"></textarea></label>
+              <label class="field"><span>参考图锁定说明</span><textarea id="camera-reference-locks" rows="2" placeholder="例如：附角色三视图、场景主参考图、红色证物近景；角色身份与场景空间均以参考图为准"></textarea></label>
+            </section>
+          </div>
+
+          <p id="camera-validation" class="validation-message"></p>
+
+          <label class="field camera-output-field">
+            <span>完整提示词</span>
+            <textarea id="camera-output" rows="16" spellcheck="false"></textarea>
+          </label>
+        </div>
+
+        <footer class="camera-toolbar">
+          <button id="camera-clear" type="button" class="button secondary">清空</button>
+          <button id="camera-copy" type="button" class="button primary">复制完整提示词</button>
+        </footer>
+      </section>
+    </main>
+
+    <main id="music-workspace" class="music-production-shell workspace-view" data-workspace-view="music" hidden>
+      <section class="project-context-strip" data-project-context="music" aria-label="项目视觉基准" hidden></section>
+      <nav class="music-mobile-switch" aria-label="音乐工作区分区">
+        <button type="button" class="active" data-music-mobile-pane="library" aria-pressed="true">案例</button>
+        <button type="button" data-music-mobile-pane="design" aria-pressed="false">设计</button>
+        <button type="button" data-music-mobile-pane="output" aria-pressed="false">输出</button>
+      </nav>
+      <section class="music-library-panel" aria-label="影视配乐案例库">
+        <header class="music-panel-header"><div><span>SCORING LIBRARY</span><h1>影视配乐案例库</h1><p>从叙事任务出发，选择后仍可完整改写。</p></div><strong id="music-template-count" class="music-count">0</strong></header>
+        <label class="music-field"><span>搜索案例</span><input id="music-search" type="search" placeholder="情绪、场景、配器"></label>
+        <div id="music-purpose-tabs" class="music-purpose-tabs" role="tablist" aria-label="配乐用途">
+          <button type="button" class="active" data-music-purpose="film">电影</button><button type="button" data-music-purpose="series">剧集</button><button type="button" data-music-purpose="short">短片</button><button type="button" data-music-purpose="documentary">纪录片</button><button type="button" data-music-purpose="advertising">广告</button><button type="button" data-music-purpose="promo">宣传片</button><button type="button" data-music-purpose="trailer">预告片</button><button type="button" data-music-purpose="animation">动画</button><button type="button" data-music-purpose="game">游戏</button><button type="button" data-music-purpose="social">自媒体</button><button type="button" data-music-purpose="ambient_music">氛围音乐</button>
+        </div>
+        <div class="music-filter-row"><label class="music-field"><span>叙事类型</span><select id="music-genre"><option value="all">全部</option><option value="drama">剧情</option><option value="suspense">悬疑</option><option value="crime">犯罪</option><option value="scifi">科幻</option><option value="war">战争</option><option value="action">动作</option><option value="romance">爱情</option><option value="comedy">喜剧</option><option value="horror">恐怖</option><option value="history">历史</option><option value="nature">自然</option><option value="humanities">人文</option><option value="corporate">企业</option><option value="public_service">公益</option></select></label><label class="music-field"><span>音乐语汇</span><select id="music-vocabulary"><option value="all">全部</option><option value="orchestral">管弦</option><option value="strings">弦乐</option><option value="piano">钢琴</option><option value="electronic">电子</option><option value="ambient">氛围</option><option value="ethnic">民族器乐</option><option value="jazz">爵士</option><option value="minimal">极简</option><option value="texture">声响纹理</option><option value="hybrid">混合配器</option></select></label></div>
+        <div id="music-template-list" class="music-template-list"></div>
+      </section>
+      <div class="music-column-resizer" data-music-resizer="left" role="separator" aria-label="调整案例库宽度" tabindex="0"></div>
+      <section class="music-structure-panel" aria-label="导演音乐设计">
+        <header class="music-panel-header"><div><span>DIRECTOR'S MUSIC BRIEF</span><h2>导演音乐设计</h2><p>描述画面、情绪、配器和结构，保持创作自由。</p></div><div class="music-toolbar-actions"><button id="music-example" type="button" class="button secondary">载入示例</button><button id="music-clear" type="button" class="button secondary" title="移除当前配乐草稿，并同步将项目配乐状态更新为待建立">重置草稿</button></div></header>
+        <section class="music-form-section"><h3>01 画面与叙事</h3><div class="music-form-grid"><label class="music-field music-wide"><span>画面场景（中文）</span><textarea id="music-scene-zh" rows="3" placeholder="时间、空间、人物状态与正在发生的事"></textarea></label><label class="music-field music-wide"><span>英文场景补充（可选）</span><textarea id="music-scene-en" rows="2" placeholder="用于补充专有名词或准确英文场景，不会自动伪翻译"></textarea></label><label class="music-field"><span>人物 / 主体状态</span><input id="music-subject-state" placeholder="例如：独自等待，强忍不安"></label><label class="music-field"><span>叙事目标</span><input id="music-narrative-goal" placeholder="例如：暗示危险正在靠近"></label><label class="music-field music-wide"><span>关键画面节点</span><input id="music-key-beat" placeholder="例如：第 12 秒人物回头时出现一次低频落点"></label></div></section>
+        <section class="music-form-section"><h3>02 风格与情绪</h3><div class="music-form-grid"><label class="music-field"><span>主要风格</span><select id="music-primary-genre"><option value="cinematic_score">电影配乐</option><option value="orchestral_score">管弦配乐</option><option value="ambient_score">氛围配乐</option><option value="electronic_score">电子配乐</option><option value="hybrid_score">混合配乐</option></select></label><label class="music-field"><span>辅助风格</span><select id="music-secondary-genre"><option value="">无</option><option value="orchestral_score">管弦</option><option value="ambient_score">氛围</option><option value="electronic_score">电子</option><option value="hybrid_score">混合</option></select></label><label class="music-field"><span>年代</span><select id="music-era"><option value="contemporary">当代</option><option value="timeless">无明确年代</option><option value="vintage_1970s">1970年代</option><option value="vintage_1980s">1980年代</option></select></label><label class="music-field"><span>文化语汇</span><select id="music-cultural-language"><option value="neutral">中性</option><option value="eastern">东方</option><option value="regional">地域</option></select></label><label class="music-field"><span>核心情绪</span><select id="music-core-emotion"><option value="restrained">克制</option><option value="intimate">亲密</option><option value="tense">紧张</option><option value="melancholic">忧郁</option><option value="hopeful">希望</option><option value="majestic">庄严宏大</option><option value="playful">灵动轻快</option></select></label><label class="music-field"><span>强度</span><select id="music-intensity"><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label></div></section>
+        <section class="music-form-section"><h3>03 配器组合</h3><div id="music-instrument-presets" class="music-preset-grid"></div><div class="music-instrument-browser-controls"><label class="music-field"><span>国家 / 地域</span><select id="music-instrument-region"></select></label><label class="music-field"><span>乐器类型</span><select id="music-instrument-family"></select></label><span id="music-instrument-selection-count" aria-live="polite">已选 0 件乐器</span></div><div id="music-instrument-layers" class="music-instrument-layers"></div></section>
+        <section class="music-form-section"><h3>04 节奏与四段结构</h3><div class="music-form-grid"><div class="music-duration-workbench music-wide"><label class="music-field"><span>时长方式</span><select id="music-duration-mode"><option value="preset">常用时长</option><option value="custom">自定义时长</option><option value="natural">自然完整结束</option></select></label><label id="music-duration-preset" class="music-field music-duration-detail"><span>常用时长</span><select id="music-duration"><option value="15">15 秒</option><option value="30">30 秒</option><option value="60">60 秒</option><option value="90">90 秒</option><option value="120">2 分钟</option><option value="180">3 分钟</option><option value="300">5 分钟</option></select></label><div id="music-custom-duration" class="music-custom-duration music-duration-detail" hidden><label class="music-field"><span>分钟</span><input id="music-duration-minutes" type="number" min="0" max="60" step="1"></label><label class="music-field"><span>秒</span><input id="music-duration-seconds" type="number" min="0" max="59" step="1"></label><strong id="music-duration-summary">合计 15 秒</strong></div><p id="music-duration-natural-note" class="music-duration-natural-note" hidden>不限定固定秒数，由四段音乐结构决定最终长度并自然收束。</p></div><label class="music-field"><span>速度感</span><select id="music-tempo-feel"><option value="slow">慢速</option><option value="moderate">中速</option><option value="fast">快速</option></select></label><label class="music-field"><span>节奏感</span><select id="music-rhythm-feel"><option value="no_pulse">无明显节拍</option><option value="flowing">流动</option><option value="steady_pulse">稳定脉冲</option><option value="syncopated">切分</option><option value="driving">推进</option><option value="explosive">爆发</option></select></label><label class="music-field"><span>开场</span><input id="music-structure-opening"></label><label class="music-field"><span>发展</span><input id="music-structure-development"></label><label class="music-field"><span>高潮（可空）</span><input id="music-structure-climax"></label><label class="music-field music-wide"><span>结尾</span><input id="music-structure-ending"></label></div></section>
+        <button id="music-advanced-toggle" class="music-advanced-toggle" type="button" aria-expanded="false">展开高级控制</button>
+        <section id="music-advanced-controls" class="music-form-section music-advanced" hidden><h3>高级控制</h3><div class="music-form-grid"><label class="music-field"><span>BPM（可空）</span><input id="music-bpm" type="number" min="30" max="240"></label><label class="music-field"><span>拍号</span><select id="music-meter"><option>4/4</option><option>3/4</option><option>6/8</option><option>5/4</option></select></label><label class="music-field"><span>调性</span><select id="music-tonality"><option value="minor">小调</option><option value="major">大调</option><option value="modal">调式</option><option value="atonal">弱调性</option></select></label><label class="music-field"><span>动态</span><select id="music-dynamics"><option value="wide">宽动态</option><option value="restrained">克制动态</option><option value="compressed">控制动态</option></select></label><label class="music-field"><span>配器密度</span><select id="music-mix-density"><option value="sparse">稀疏</option><option value="balanced">均衡</option><option value="dense">密集</option></select></label><label class="music-field"><span>空间宽度</span><select id="music-space-width"><option value="intimate">亲密</option><option value="balanced">均衡</option><option value="wide">宽阔</option></select></label><label class="music-field"><span>混响</span><select id="music-reverb"><option value="dry">干</option><option value="natural">自然</option><option value="spacious">宽阔</option><option value="long">长尾</option></select></label><label class="music-field"><span>录音质感</span><select id="music-recording"><option value="cinematic">电影录音</option><option value="warm_natural">温暖自然</option><option value="modern_clean">现代干净</option><option value="raw">粗粝真实</option></select></label><label class="music-field"><span>对白关系</span><select id="music-dialogue-mode"><option value="none">无对白</option><option value="light">少量对白</option><option value="dense">密集对白</option><option value="narration">旁白</option></select></label><label class="music-field"><span>剪辑关系</span><select id="music-edit-rhythm"><option value="not_forced">不强制卡点</option><option value="gentle_sync">轻度同步</option><option value="hard_sync">强同步</option></select></label><label class="music-field music-wide"><span>声音同步点</span><input id="music-key-sync-point"></label><label class="music-field music-wide"><span>额外限制</span><textarea id="music-extra-restrictions" rows="2"></textarea></label></div></section>
+      </section>
+      <div class="music-column-resizer" data-music-resizer="right" role="separator" aria-label="调整输出区宽度" tabindex="0"></div>
+      <section class="music-output-panel" aria-label="跨模型配乐提示词输出">
+        <header class="music-panel-header"><div><span>MODEL ADAPTER</span><h2>配乐提示词输出</h2><p>同一导演意图，转换为不同音乐模型需要的格式。</p></div><span class="music-instrumental-badge">纯音乐锁定</span></header>
+        <div class="music-output-settings"><label class="music-field"><span>目标模型</span><select id="music-target-model"><option value="generic">通用影视音乐模型</option><option value="suno">Suno</option><option value="udio">Udio</option><option value="stable_audio">Stable Audio</option><option value="lyria">Lyria</option></select></label><label class="music-field"><span>提示词密度</span><select id="music-prompt-density"><option value="concise">简洁</option><option value="detailed">详细</option></select></label></div>
+        <p id="music-validation" class="music-validation" role="status"></p>
+        <section class="music-analysis-card"><header><span>导演分析</span></header><pre id="music-director-analysis"></pre></section>
+        <div id="music-output-fields" class="music-output-fields"></div>
+        <button id="music-copy-all" type="button" class="button primary music-copy-all">复制当前模型全部字段</button>
+        <div class="music-file-row"><span>建议文件名</span><code id="music-filename">MUSIC_影视纯音乐_v001.txt</code></div>
+      </section>
+      <footer class="music-status-bar" aria-label="当前配乐状态">
+        <span id="music-status-draft" class="music-status-draft" data-state="empty" aria-live="polite">草稿：待建立</span>
+        <span>项目：<strong id="music-status-project">未命名电影项目</strong></span>
+        <span>时长：<strong id="music-status-duration">15 秒</strong></span>
+        <span>速度：<strong id="music-status-tempo">慢速</strong></span>
+        <span>拍号：<strong id="music-status-meter">4/4</strong></span>
+      </footer>
+    </main>
+
+    <script src="vendor/lucide.min.js"></script>
+    <script src="prompt-data.js"></script>
+    <script src="premium-type-styles.js"></script>
+    <script src="chinese-drama-styles.js"></script>
+    <script src="camera-data.js"></script>
+    <script src="camera-timeline-seedance30.js?v=20260811-v1"></script>
+    <script src="app.js?v=20260723-scene-inheritance-v1"></script>
+    <script src="look-studio.js?v=20260811-camera-workspace-title-v1"></script>
+    <script src="camera-app-seedance30.js?v=20260811-30s-structure-v1"></script>
+    <script src="casting-asset-store.js?v=20260715-casting-reference-upload"></script>
+    <script src="casting-app.js?v=20260811-clear-face-four-view-v4"></script>
+    <script src="poster-template-data.js?v=20260717-poster-templates-v1"></script>
+    <script src="poster-title-template-data.js?v=20260719-poster-title-library-v1"></script>
+    <script src="poster-title-mark-data.js?v=20260719-poster-title-mark-v1"></script>
+    <script src="vendor/fabric-7.4.0.min.js"></script>
+    <script src="poster-asset-store.js?v=20260720-poster-compositor-v1"></script>
+    <script src="poster-compositor.js?v=20260720-poster-layer-delete-v25"></script>
+    <script src="poster-app.js?v=20260721-core-audit-v27"></script>
+    <script src="reverse-analysis.js?v=20260717-reverse-analysis-contract-v1"></script>
+    <script src="reverse-app.js?v=20260717-reverse-three-column-shell-v1"></script>
+    <script src="music-data.js?v=20260718-ambient-duration-v1"></script>
+    <script src="music-adapters.js?v=20260718-ambient-duration-v1"></script>
+    <script src="music-app.js?v=20260812-takeover-state-sync-v1"></script>
+    <script src="scene-assistant-data.js?v=20260723-director-analysis-v2"></script>
+    <script src="screenplay-ai-analysis.js?v=20260811-quality-gate-v1"></script>
+    <script src="screenplay-analysis-quality.js?v=20260811-quality-gate-v1"></script>
+    <script src="scene-video-adapters.js?v=20260811-production-contract-v2"></script>
+    <script src="scene-inheritance.js?v=20260723-scene-inheritance-v1"></script>
+    <script src="scene-readiness.js?v=20260726-shot-delivery-v2"></script>
+    <script src="project-shot-readiness.js?v=20260812-shot-production-card-v2"></script>
+    <script src="project-asset-locks.js?v=20260811-asset-master-v1"></script>
+    <script src="project-production-queue.js?v=20260811-production-queue-v1"></script>
+    <script src="project-production-audit.js?v=20260811-production-audit-v1"></script>
+    <script src="project-shot-results.js?v=20260727-shot-results-v2"></script>
+    <script src="project-shot-results-ui.js?v=20260727-shot-results-ui-v2"></script>
+    <script src="project-store.js?v=20260811-production-contract-v2"></script>
+    <script src="project-delivery.js?v=20260812-model-package-v1"></script>
+    <script src="project-shot-continuity.js?v=20260812-shot-continuity-v1"></script>
+    <script src="vendor/mammoth.browser.min.js"></script>
+    <script src="screenplay-import.js"></script>
+    <script src="project-reference-store.js?v=20260721-project-foundation-v1"></script>
+    <script src="vendor/fflate-0.8.2.min.js"></script>
+    <script src="project-archive.js?v=20260811-asset-master-v1"></script>
+    <script src="project-archive-service.js?v=20260727-package-transaction-v2"></script>
+    <input id="project-result-keyframe-upload" type="file" accept="image/*" hidden>
+    <script src="project-summary.js?v=20260812-takeover-state-sync-v1"></script>
+    <script src="project-cover.js?v=20260719-project-dashboard-v1"></script>
+    <script src="workspace-navigation.js?v=20260721-core-audit-v27"></script>
+    <script src="workspace-core.js?v=20260811-asset-master-v1"></script>
+    <script src="project-foundation.js?v=20260721-project-name-foundation-v2"></script>
+    <script src="project-context.js?v=20260721-project-foundation-v1"></script>
+    <script src="project-dashboard.js?v=20260811-manual-project-modal-v1"></script>
+  <script src="project-scenes.js?v=20260812-model-continuity-v1"></script>
+    <script src="ui-motion.js?v=20260811-camera-workspace-title-v1"></script>
+  </body>
+</html>
