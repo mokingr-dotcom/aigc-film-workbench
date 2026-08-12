@@ -138,7 +138,8 @@
     script: { number: "01", label: "剧本", detail: "导入并确认场次" },
     scenes: { number: "02", label: "场次", detail: "拆镜头与定时长" },
     assets: { number: "03", label: "资产", detail: "锁定角色与场景参考" },
-    delivery: { number: "04", label: "交付", detail: "复制单镜头提示词" }
+    delivery: { number: "04", label: "交付", detail: "复制单镜头提示词" },
+    review: { number: "05", label: "审片", detail: "全片监视墙与自检" }
   });
 
   function clearReferencePreviewUrls() {
@@ -885,6 +886,49 @@
     }).join("") : `<p>当前筛选下没有镜头。</p>`}</div></section>`;
   }
 
+  function renderProjectMonitorWall(list) {
+    const allShots = list.flatMap((scene) => (scene.shots || []).map((shot, index) => ({ scene, shot, index })));
+    const producedShots = allShots.filter((item) => item.shot.status === "generated" || item.shot.status === "locked");
+    const completionRate = allShots.length ? Math.round((producedShots.length / allShots.length) * 100) : 0;
+
+    return `<section class="project-monitor-wall" aria-label="项目总监视墙">
+      <header>
+        <div>
+          <span>PRODUCTION MONITOR WALL</span>
+          <strong>项目总监视墙</strong>
+          <small>汇总全片已生成的视觉资产，用于导演进行连续性自检和节奏把控。</small>
+        </div>
+        <div class="monitor-wall-stats">
+          <b>${producedShots.length} / ${allShots.length} 镜已产出</b>
+          <div class="completion-bar"><span style="width: ${completionRate}%"></span></div>
+          <small>${completionRate}% 完成度</small>
+        </div>
+      </header>
+      <div class="monitor-wall-grid">
+        ${allShots.length ? allShots.map(({ scene, shot, index }) => {
+          const result = selectedResultForStoryboard(shot);
+          const hasResult = result?.resultUrl || result?.keyframeReferenceId;
+          return `
+            <div class="monitor-shot-card ${hasResult ? "has-result" : "is-empty"}" data-scene-id="${escapeHtml(scene.id)}" data-shot-id="${escapeHtml(shot.id)}">
+              <div class="monitor-shot-preview" data-project-reference-container>
+                ${result?.resultUrl ? `<video src="${escapeHtml(result.resultUrl)}" loop muted playsinline></video>` : 
+                  (result?.keyframeReferenceId ? `<img data-project-result-preview="${escapeHtml(result.keyframeReferenceId)}" hidden>` : `<span>场 ${scene.number} 镜 ${index + 1}</span>`)}
+                <div class="monitor-shot-overlay">
+                  <b>场 ${String(scene.number).padStart(2, "0")} · 镜 ${String(index + 1).padStart(2, "0")}</b>
+                  <small>${escapeHtml(shotStatusLabel(shot))}</small>
+                </div>
+              </div>
+              <footer>
+                <strong>${escapeHtml(sceneLabel(scene))}</strong>
+                <p>${escapeHtml(shot.promptCard?.narrative || scene.storyBeat || "未填写叙事")}</p>
+              </footer>
+            </div>
+          `;
+        }).join("") : `<p class="empty-text">项目中尚未建立任何镜头。</p>`}
+      </div>
+    </section>`;
+  }
+
   function renderProductionStrip() {
     if (!elements.productionStrip) return;
     const project = activeProject();
@@ -906,7 +950,8 @@
       </header>
       <section class="project-production-queue" aria-label="当前制作队列"><header><div><span>PRODUCTION QUEUE</span><strong>现在优先处理什么</strong><small>按资产连续性和镜头交付顺序排列，先解决会影响整片一致性的工作。</small></div><b>${queue[0]?.kind === "delivery" ? "可交付" : `${queue.reduce((total, item) => total + (Number(item.count) || 0), 0)} 项待处理`}</b></header><div>${queue.map((task, index) => `<article data-queue-kind="${escapeHtml(task.kind)}"><b>${String(index + 1).padStart(2, "0")}</b><section><strong>${escapeHtml(task.label)}</strong><small>${escapeHtml(task.detail)}</small></section><button type="button" data-scene-action="open-production-task" data-task-kind="${escapeHtml(task.kind)}" data-task-asset-id="${escapeHtml(task.assetId || "")}" data-scene-id="${escapeHtml(task.sceneId || "")}" data-shot-id="${escapeHtml(task.shotId || "")}">${escapeHtml(task.action)}</button></article>`).join("")}</div></section>
       <div class="project-production-stage" data-production-stage="scenes">${renderSceneProductionPlan(list, selectedId)}${renderProjectStoryboard(list, selectedId, selectedShot())}</div>
-      <div class="project-production-stage" data-production-stage="assets">${renderProjectAssetLedger(project)}${renderProjectContinuityReview(project)}</div>`;
+      <div class="project-production-stage" data-production-stage="assets">${renderProjectAssetLedger(project)}${renderProjectContinuityReview(project)}</div>
+      <div class="project-production-stage" data-production-stage="review">${renderProjectMonitorWall(list)}</div>`;
   }
 
   function renderList() {
@@ -2107,7 +2152,7 @@
       return;
     }
     if (action === "select-storyboard-filter") { storyboardFilter = button.dataset.storyboardFilter || "all"; renderProductionStrip(); void refreshReferencePreviews(); return; }
-    if (action === "select-storyboard-shot") {
+    if (action === "select-storyboard-shot" || action === "select-monitor-shot") {
       clearResultForm();
       selectedSceneId = button.dataset.sceneId || "";
       selectedShotId = button.dataset.shotId || "";
