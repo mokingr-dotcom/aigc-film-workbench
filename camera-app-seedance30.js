@@ -66,7 +66,12 @@
     output: document.querySelector("#camera-output"),
     copy: document.querySelector("#camera-copy"),
     clear: document.querySelector("#camera-clear"),
-    validation: document.querySelector("#camera-validation")
+    validation: document.querySelector("#camera-validation"),
+    musicContext: document.querySelector("#camera-music-context"),
+    musicContextStatus: document.querySelector("#camera-music-context-status"),
+    musicContextSummary: document.querySelector("#camera-music-context-summary"),
+    musicContextMeta: document.querySelector("#camera-music-context-meta"),
+    musicContextOpen: document.querySelector("#camera-music-context-open")
   };
 
   const cameraImages = [
@@ -422,6 +427,36 @@
     });
   }
 
+  function renderMusicContext() {
+    const context = elements.musicContext;
+    if (!context) return;
+    let musicState = null;
+    try {
+      musicState = root.aigcMusicWorkbench?.exportState?.() || null;
+    } catch (_) {
+      musicState = null;
+    }
+    const dictionary = root.aigcMusicData?.MUSIC_DICTIONARY || {};
+    const configured = Boolean(musicState?.templateId || musicState?.sceneZh?.trim() || musicState?.narrativeGoal?.trim());
+    context.dataset.state = configured ? "configured" : "empty";
+    elements.musicContextStatus.textContent = configured ? "配乐意图已建立" : "配乐待建立";
+    elements.musicContextSummary.textContent = configured
+      ? (musicState.sceneZh || musicState.narrativeGoal || "已建立配乐意图，保持镜头与声音的叙事方向一致。")
+      : "先建立配乐意图，运镜会在这里显示节奏、情绪与关键画面关系。";
+    const meta = [];
+    if (configured && musicState.coreEmotion) meta.push(`情绪：${dictionary[musicState.coreEmotion]?.zh || musicState.coreEmotion}`);
+    if (configured && musicState.tempoFeel) meta.push(`速度：${dictionary[musicState.tempoFeel]?.zh || musicState.tempoFeel}`);
+    if (configured && musicState.rhythmFeel) meta.push(`节奏：${dictionary[musicState.rhythmFeel]?.zh || musicState.rhythmFeel}`);
+    if (configured && Number.isFinite(musicState.duration)) meta.push(`时长：${musicState.duration} 秒`);
+    const latest = Array.isArray(musicState?.versions) ? musicState.versions[0] : null;
+    if (latest) meta.push(`已保存 V${latest.number}`);
+    elements.musicContextMeta.replaceChildren(...(meta.length ? meta : ["尚未同步音乐上下文"]).map((label) => {
+      const chip = document.createElement("span");
+      chip.textContent = label;
+      return chip;
+    }));
+  }
+
   function renderCameraStage() {
     const item = state.selected;
     elements.selection.classList.toggle("empty-selection", !item);
@@ -475,6 +510,7 @@
     elements.validation.textContent = missing.length ? `还需完成：${missing.join("、")}` : "内容完整，可以复制生成。";
     elements.validation.classList.toggle("ready", missing.length === 0);
     renderCameraStage();
+    renderMusicContext();
   }
 
   function renderLibrary() {
@@ -595,6 +631,8 @@
   });
 
   elements.clear.addEventListener("click", resetComposer);
+  elements.musicContextOpen?.addEventListener("click", () => root.aigcWorkspaceNavigation?.show("music"));
+  document.addEventListener("aigc:music-context-changed", renderMusicContext);
 
   elements.blockingToggle.addEventListener("click", () => {
     state.blockingOpen = !state.blockingOpen;
@@ -738,4 +776,10 @@
 
   renderLibrary();
   renderComposer();
+  root.setTimeout?.(() => {
+    renderMusicContext();
+    root.aigcWorkspaceNavigation?.subscribe((workspace) => {
+      if (workspace === "camera") renderMusicContext();
+    });
+  }, 0);
 })(typeof window !== "undefined" ? window : globalThis);

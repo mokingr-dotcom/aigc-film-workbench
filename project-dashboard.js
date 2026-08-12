@@ -218,7 +218,7 @@
   }
 
   function renderStages(project, summary) {
-    elements.stageMeta.textContent = `${summary.configuredCount} 项已设置 · 建议：${summary.next.title}`;
+    elements.stageMeta.textContent = `${summary.configuredCount} / 6 个工作台已设置 · 下一步：${summary.next.title}`;
     elements.stages.innerHTML = WORKSPACE_ORDER.map((id) => {
       const item = summary.summaries[id];
       return `<button type="button" class="project-stage-item status-${item.status}" data-open-workspace="${id}"><span>${WORKSPACE_INDEX[id]} ${escapeHtml(item.title)}</span><strong>${escapeHtml(item.detail)}</strong><small>${item.status === "configured" ? "已设置" : item.status === "unreadable" ? "检查数据" : "待建立"}</small></button>`;
@@ -229,12 +229,12 @@
     elements.detailContent.innerHTML = `
       <header class="project-detail-header"><span>当前项目</span><h2>${escapeHtml(project.name)}</h2><p>${escapeHtml(projectType(project))} · 更新于 ${escapeHtml(formatDate(project.updatedAt))}</p></header>
       <div class="project-detail-cover"><img data-project-cover="${escapeHtml(project.id)}" alt="${escapeHtml(project.name)}封面"><span>${escapeHtml(project.productionMeta?.aspectRatio || "16:9")}</span></div>
-      <button type="button" class="project-detail-continue" data-project-action="continue" data-project-id="${escapeHtml(project.id)}">${escapeHtml(summary.next.actionLabel)}<i data-lucide="arrow-right" aria-hidden="true"></i></button>
+      <button type="button" class="project-detail-continue" data-project-action="continue" data-project-id="${escapeHtml(project.id)}" aria-label="${escapeHtml(summary.next.actionLabel)}：${escapeHtml(summary.next.title)}">${escapeHtml(summary.next.actionLabel)} · ${escapeHtml(summary.next.title)}<i data-lucide="arrow-right" aria-hidden="true"></i></button>
       <section class="project-detail-section"><h3>六个工作台</h3><div class="project-workspace-grid">${WORKSPACE_ORDER.map((id) => {
         const item = summary.summaries[id];
         return `<button type="button" data-open-workspace="${id}" class="status-${item.status}"><span>${escapeHtml(item.title)}</span><small>${escapeHtml(item.status === "configured" ? "已设置" : item.status === "unreadable" ? "需检查" : "待建立")}</small></button>`;
       }).join("")}</div></section>
-      <section class="project-next-step"><span>下一步</span><strong>${escapeHtml(summary.next.title)}</strong><p>${escapeHtml(summary.next.detail)}</p></section>`;
+      <section class="project-next-step"><span>推荐下一步</span><strong>${escapeHtml(summary.next.title)}</strong><p>${escapeHtml(summary.next.detail)}</p></section>`;
   }
 
   function renderSelectedProject(project) {

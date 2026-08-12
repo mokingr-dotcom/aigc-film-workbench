@@ -23,11 +23,13 @@
     spaceWidth: $("music-space-width"), reverb: $("music-reverb"), recording: $("music-recording"), dialogueMode: $("music-dialogue-mode"), editRhythm: $("music-edit-rhythm"),
     keySyncPoint: $("music-key-sync-point"), extraRestrictions: $("music-extra-restrictions"), targetModel: $("music-target-model"), promptDensity: $("music-prompt-density"),
     validation: $("music-validation"), directorAnalysis: $("music-director-analysis"), outputFields: $("music-output-fields"), copyAll: $("music-copy-all"), filename: $("music-filename"),
+    saveVersion: $("music-save-version"), versionCount: $("music-version-count"), versionEmpty: $("music-version-empty"), versionList: $("music-version-list"),
     example: $("music-example"), clear: $("music-clear"), resizers: [...document.querySelectorAll("[data-music-resizer]")],
     mobilePaneButtons: [...document.querySelectorAll("[data-music-mobile-pane]")], projectName: $("project-name"),
     statusProject: $("music-status-project"), statusDuration: $("music-status-duration"), statusTempo: $("music-status-tempo"), statusMeter: $("music-status-meter"), draftStatus: $("music-status-draft")
   };
-  if (Object.values(elements).some((value) => value === null)) return;
+  const optionalElementKeys = new Set(["saveVersion", "versionCount", "versionEmpty", "versionList"]);
+  if (Object.entries(elements).some(([key, value]) => !optionalElementKeys.has(key) && value === null)) return;
 
   const fieldMap = {
     sceneZh: "sceneZh", sceneEn: "sceneEn", subjectState: "subjectState", narrativeGoal: "narrativeGoal", keyBeat: "keyBeat",
@@ -51,7 +53,10 @@
   function setValue(element, value) { element.value = value ?? ""; }
   // Workspace Core listens on document. Keep every music mutation on the same event bus so
   // clearing a draft persists the cleared state instead of leaving an old cue in the project.
-  function notifyDirty() { document.dispatchEvent(new root.CustomEvent("aigc:workspace-dirty", { detail: { workspace: "music" } })); }
+  function notifyDirty() {
+    document.dispatchEvent(new root.CustomEvent("aigc:workspace-dirty", { detail: { workspace: "music" } }));
+    document.dispatchEvent(new root.CustomEvent("aigc:music-context-changed"));
+  }
   function safeName(value) { return String(value || "影视纯音乐").replace(/[\\/:*?"<>|\s]+/g, "_"); }
   function syncDurationControls() {
     const natural = state.durationMode === "natural";
@@ -80,6 +85,84 @@
     const configured = hasProjectMusicDraft();
     elements.draftStatus.dataset.state = configured ? "configured" : "empty";
     elements.draftStatus.textContent = configured ? "草稿：已同步到项目" : "草稿：待建立";
+  }
+  function nextVersionNumber() {
+    return Math.max(0, ...state.versions.map((version) => Number(version.number) || 0)) + 1;
+  }
+  function versionSummary(version) {
+    const snapshot = version.musicState || {};
+    return String(snapshot.sceneZh || snapshot.narrativeGoal || version.prompt || "已保存的配乐意图").trim().split(/\r?\n/)[0] || "已保存的配乐意图";
+  }
+  function versionDate(value) {
+    if (!value) return "刚刚保存";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? "已保存" : date.toLocaleDateString("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit" });
+  }
+  function renderVersions() {
+    if (!elements.versionList || !elements.versionCount || !elements.versionEmpty) return;
+    const versions = Array.isArray(state.versions) ? state.versions : [];
+    const limit = D.MUSIC_VERSION_LIMIT || 12;
+    elements.versionCount.textContent = `${versions.length} / ${limit}`;
+    elements.versionEmpty.hidden = versions.length > 0;
+    elements.versionList.replaceChildren(...versions.map((version) => {
+      const card = document.createElement("article");
+      card.className = "music-version-card";
+      const header = document.createElement("header");
+      header.className = "music-version-card-header";
+      const title = document.createElement("strong");
+      title.textContent = version.name || `配乐方案 V${version.number}`;
+      const time = document.createElement("time");
+      time.dateTime = version.createdAt || "";
+      time.textContent = versionDate(version.createdAt);
+      header.append(title, time);
+      const summary = document.createElement("p");
+      summary.textContent = versionSummary(version);
+      const footer = document.createElement("footer");
+      footer.className = "music-version-card-footer";
+      const model = document.createElement("small");
+      model.textContent = D.MUSIC_TARGETS[version.targetModel] || "通用影视音乐模型";
+      const restore = document.createElement("button");
+      restore.type = "button";
+      restore.dataset.musicRestoreVersion = version.id;
+      restore.textContent = "恢复此版本";
+      footer.append(model, restore);
+      card.append(header, summary, footer);
+      return card;
+    }));
+  }
+  function syncVersionControls() {
+    if (!elements.saveVersion) return;
+    const validation = D.validateMusicState(state);
+    const next = nextVersionNumber();
+    elements.saveVersion.textContent = `保存方案 V${next}`;
+    elements.saveVersion.disabled = !validation.valid;
+    elements.saveVersion.title = validation.valid ? "保存当前完整配乐方案；最多保留 12 个版本" : "请先补齐画面场景或选择一个配乐案例";
+  }
+  function saveVersion() {
+    const validation = D.validateMusicState(state);
+    if (!validation.valid) return;
+    const number = nextVersionNumber();
+    const snapshot = D.normalizeMusicState({ ...state, versions: [] });
+    const savedOutput = buildMusicOutput(snapshot, snapshot.targetModel, snapshot.promptDensity);
+    const version = {
+      id: `music-version-${Date.now()}-${number}`,
+      number,
+      name: `配乐方案 V${number}`,
+      createdAt: new Date().toISOString(),
+      targetModel: snapshot.targetModel,
+      prompt: savedOutput.combined || "",
+      musicState: snapshot
+    };
+    state = D.normalizeMusicState({ ...state, versions: [version, ...state.versions] });
+    renderAll();
+    notifyDirty();
+  }
+  function restoreVersion(id) {
+    const version = state.versions.find((item) => item.id === id);
+    if (!version?.musicState) return;
+    state = D.normalizeMusicState({ ...version.musicState, versions: state.versions });
+    renderAll();
+    notifyDirty();
   }
   function syncControls() {
     Object.entries(fieldMap).forEach(([elementKey, stateKey]) => setValue(elements[elementKey], state[stateKey]));
@@ -167,7 +250,7 @@
     elements.filename.textContent = `MUSIC_${safeName(D.MUSIC_PURPOSES[state.purpose])}_${safeName(D.MUSIC_TARGETS[state.targetModel])}_${durationLabel}_v001.txt`;
   }
 
-  function renderAll() { syncControls(); renderTemplates(); renderInstruments(); renderOutput(); syncStatusBar(); applyLayout(); }
+  function renderAll() { syncControls(); renderTemplates(); renderInstruments(); renderOutput(); renderVersions(); syncVersionControls(); syncStatusBar(); applyLayout(); }
   function mutate(next, dirty = true) { state = D.normalizeMusicState(next); renderAll(); if (dirty) notifyDirty(); }
 
   function applyTemplate(id) {
@@ -220,7 +303,12 @@
   elements.durationSeconds.addEventListener("change", updateCustomDuration);
   elements.advancedToggle.addEventListener("click", () => mutate({ ...state, advancedOpen: !state.advancedOpen }));
   elements.example.addEventListener("click", () => applyTemplate("film-psychological-suspense"));
-  elements.clear.addEventListener("click", () => mutate({ ...D.DEFAULT_MUSIC_STATE, sceneZh: "", sceneEn: "", templateId: "", narrativeGoal: "", subjectState: "", keyBeat: "" }));
+  elements.clear.addEventListener("click", () => mutate({ ...D.DEFAULT_MUSIC_STATE, sceneZh: "", sceneEn: "", templateId: "", narrativeGoal: "", subjectState: "", keyBeat: "", versions: state.versions }));
+  if (elements.saveVersion) elements.saveVersion.addEventListener("click", saveVersion);
+  if (elements.versionList) elements.versionList.addEventListener("click", (event) => {
+    const restore = event.target.closest("[data-music-restore-version]");
+    if (restore) restoreVersion(restore.dataset.musicRestoreVersion);
+  });
   elements.projectName.addEventListener("input", () => {
     elements.statusProject.textContent = elements.projectName.value.trim() || "未命名电影项目";
   });
@@ -286,9 +374,21 @@
 
   const api = {
     exportState: () => D.normalizeMusicState(state),
-    importState: (next) => { state = D.normalizeMusicState(next || D.DEFAULT_MUSIC_STATE); filters = { search: "", genre: "all", vocabulary: "all" }; instrumentFilters = { region: "all", family: "all" }; elements.search.value = ""; elements.genre.value = "all"; elements.vocabulary.value = "all"; initializeInstrumentFilters(); renderAll(); },
+    importState: (next) => {
+      state = D.normalizeMusicState(next || D.DEFAULT_MUSIC_STATE);
+      filters = { search: "", genre: "all", vocabulary: "all" };
+      instrumentFilters = { region: "all", family: "all" };
+      elements.search.value = "";
+      elements.genre.value = "all";
+      elements.vocabulary.value = "all";
+      initializeInstrumentFilters();
+      renderAll();
+      document.dispatchEvent(new root.CustomEvent("aigc:music-context-changed"));
+    },
     clear: () => elements.clear.click(),
     selectTemplate: (id) => applyTemplate(id),
+    saveVersion,
+    restoreVersion,
     getOutput: () => ({ ...output, fields: output.fields.map((field) => ({ ...field })) }),
     receiveProjectContext(context) {
       const prompt = String(context?.prompt || "").trim();
@@ -301,4 +401,5 @@
   root.aigcMusicWorkbench = api;
   initializeInstrumentFilters();
   renderAll();
+  document.dispatchEvent(new root.CustomEvent("aigc:music-context-changed"));
 })(typeof window !== "undefined" ? window : globalThis);

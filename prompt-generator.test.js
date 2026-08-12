@@ -2803,7 +2803,7 @@ runTest("camera monitor exposes a persistent 21:9 and 16:9 aspect switch", () =>
   const cameraMonitorHtml = html.slice(html.indexOf('id="camera-monitor"'), html.indexOf('class="camera-timeline-panel"'));
 
   assert(html.includes('id="camera-aspect-switch"'));
-  assert(html.includes('href="camera-option-a-seedance30-layout.css?v=20260811-v1"'));
+  assert(html.includes('href="camera-option-a-seedance30-layout.css?v=20260812-round2-cue-v1"'));
   assert(/src="camera-app-seedance30\.js\?v=[^"]+"/.test(html));
   assert(html.includes('data-camera-aspect="cinema"'));
   assert(html.includes('data-camera-aspect="wide"'));

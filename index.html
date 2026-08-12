@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="style.css?v=20260714-cinematic-console">
     <link rel="stylesheet" href="look-studio.css?v=20260714-dense-workbench">
     <link rel="stylesheet" href="tone-option2.css?v=20260717-tone-library-colors-v3">
-    <link rel="stylesheet" href="camera-option-a-seedance30-layout.css?v=20260811-v1">
+    <link rel="stylesheet" href="camera-option-a-seedance30-layout.css?v=20260812-round2-cue-v1">
     <link rel="stylesheet" href="casting-option-3.css?v=20260715-role-archive">
     <link rel="stylesheet" href="poster-three-column.css?v=20260720-poster-layer-delete-v25">
     <link rel="stylesheet" href="poster-compositor.css?v=20260720-poster-layer-delete-v25">
     <link rel="stylesheet" href="reverse-three-column.css?v=20260717-reverse-three-column-v1">
-    <link rel="stylesheet" href="music-workspace.css?v=20260812-takeover-state-sync-v1">
-    <link rel="stylesheet" href="project-dashboard.css?v=20260721-project-name-foundation-v3">
+    <link rel="stylesheet" href="music-workspace.css?v=20260812-round2-version-v1">
+    <link rel="stylesheet" href="project-dashboard.css?v=20260812-round2-dashboard-v1">
   <link rel="stylesheet" href="project-scenes.css?v=20260812-model-continuity-v1">
   </head>
   <body>
@@ -1266,6 +1266,12 @@
           </div>
         </header>
 
+        <section id="camera-music-context" class="camera-music-context" aria-label="当前配乐意图" aria-live="polite">
+          <header><div><span>MUSIC CUE</span><strong id="camera-music-context-status">配乐待建立</strong></div><button id="camera-music-context-open" type="button">打开配乐工作台</button></header>
+          <p id="camera-music-context-summary">先建立配乐意图，运镜会在这里显示节奏、情绪与关键画面关系。</p>
+          <div id="camera-music-context-meta" class="camera-music-context-meta"><span>尚未同步音乐上下文</span></div>
+        </section>
+
         <div class="camera-composer-scroll">
           <div class="camera-form-grid">
             <label class="field">
@@ -1338,7 +1344,7 @@
       </section>
       <div class="music-column-resizer" data-music-resizer="left" role="separator" aria-label="调整案例库宽度" tabindex="0"></div>
       <section class="music-structure-panel" aria-label="导演音乐设计">
-        <header class="music-panel-header"><div><span>DIRECTOR'S MUSIC BRIEF</span><h2>导演音乐设计</h2><p>描述画面、情绪、配器和结构，保持创作自由。</p></div><div class="music-toolbar-actions"><button id="music-example" type="button" class="button secondary">载入示例</button><button id="music-clear" type="button" class="button secondary" title="移除当前配乐草稿，并同步将项目配乐状态更新为待建立">重置草稿</button></div></header>
+        <header class="music-panel-header"><div><span>DIRECTOR'S MUSIC BRIEF</span><h2>导演音乐设计</h2><p>描述画面、情绪、配器和结构，保持创作自由。</p></div><div class="music-toolbar-actions"><button id="music-example" type="button" class="button secondary">载入示例</button><button id="music-save-version" type="button" class="button primary" disabled>保存方案 V1</button><button id="music-clear" type="button" class="button secondary" title="移除当前配乐草稿，并同步将项目配乐状态更新为待建立">重置草稿</button></div></header>
         <section class="music-form-section"><h3>01 画面与叙事</h3><div class="music-form-grid"><label class="music-field music-wide"><span>画面场景（中文）</span><textarea id="music-scene-zh" rows="3" placeholder="时间、空间、人物状态与正在发生的事"></textarea></label><label class="music-field music-wide"><span>英文场景补充（可选）</span><textarea id="music-scene-en" rows="2" placeholder="用于补充专有名词或准确英文场景，不会自动伪翻译"></textarea></label><label class="music-field"><span>人物 / 主体状态</span><input id="music-subject-state" placeholder="例如：独自等待，强忍不安"></label><label class="music-field"><span>叙事目标</span><input id="music-narrative-goal" placeholder="例如：暗示危险正在靠近"></label><label class="music-field music-wide"><span>关键画面节点</span><input id="music-key-beat" placeholder="例如：第 12 秒人物回头时出现一次低频落点"></label></div></section>
         <section class="music-form-section"><h3>02 风格与情绪</h3><div class="music-form-grid"><label class="music-field"><span>主要风格</span><select id="music-primary-genre"><option value="cinematic_score">电影配乐</option><option value="orchestral_score">管弦配乐</option><option value="ambient_score">氛围配乐</option><option value="electronic_score">电子配乐</option><option value="hybrid_score">混合配乐</option></select></label><label class="music-field"><span>辅助风格</span><select id="music-secondary-genre"><option value="">无</option><option value="orchestral_score">管弦</option><option value="ambient_score">氛围</option><option value="electronic_score">电子</option><option value="hybrid_score">混合</option></select></label><label class="music-field"><span>年代</span><select id="music-era"><option value="contemporary">当代</option><option value="timeless">无明确年代</option><option value="vintage_1970s">1970年代</option><option value="vintage_1980s">1980年代</option></select></label><label class="music-field"><span>文化语汇</span><select id="music-cultural-language"><option value="neutral">中性</option><option value="eastern">东方</option><option value="regional">地域</option></select></label><label class="music-field"><span>核心情绪</span><select id="music-core-emotion"><option value="restrained">克制</option><option value="intimate">亲密</option><option value="tense">紧张</option><option value="melancholic">忧郁</option><option value="hopeful">希望</option><option value="majestic">庄严宏大</option><option value="playful">灵动轻快</option></select></label><label class="music-field"><span>强度</span><select id="music-intensity"><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select></label></div></section>
         <section class="music-form-section"><h3>03 配器组合</h3><div id="music-instrument-presets" class="music-preset-grid"></div><div class="music-instrument-browser-controls"><label class="music-field"><span>国家 / 地域</span><select id="music-instrument-region"></select></label><label class="music-field"><span>乐器类型</span><select id="music-instrument-family"></select></label><span id="music-instrument-selection-count" aria-live="polite">已选 0 件乐器</span></div><div id="music-instrument-layers" class="music-instrument-layers"></div></section>
@@ -1354,6 +1360,11 @@
         <section class="music-analysis-card"><header><span>导演分析</span></header><pre id="music-director-analysis"></pre></section>
         <div id="music-output-fields" class="music-output-fields"></div>
         <button id="music-copy-all" type="button" class="button primary music-copy-all">复制当前模型全部字段</button>
+        <section class="music-version-panel" aria-label="配乐版本历史">
+          <header class="music-version-panel-header"><div><span>VERSION HISTORY</span><h3>配乐版本库</h3></div><strong id="music-version-count">0 / 12</strong></header>
+          <p id="music-version-empty" class="music-version-empty">保存一个完整方案后，这里会保留可恢复的配乐版本。</p>
+          <div id="music-version-list" class="music-version-list"></div>
+        </section>
         <div class="music-file-row"><span>建议文件名</span><code id="music-filename">MUSIC_影视纯音乐_v001.txt</code></div>
       </section>
       <footer class="music-status-bar" aria-label="当前配乐状态">
@@ -1373,7 +1384,7 @@
     <script src="camera-timeline-seedance30.js?v=20260811-v1"></script>
     <script src="app.js?v=20260723-scene-inheritance-v1"></script>
     <script src="look-studio.js?v=20260811-camera-workspace-title-v1"></script>
-    <script src="camera-app-seedance30.js?v=20260811-30s-structure-v1"></script>
+    <script src="camera-app-seedance30.js?v=20260812-round2-cue-v1"></script>
     <script src="casting-asset-store.js?v=20260715-casting-reference-upload"></script>
     <script src="casting-app.js?v=20260811-clear-face-four-view-v4"></script>
     <script src="poster-template-data.js?v=20260717-poster-templates-v1"></script>
@@ -1385,9 +1396,9 @@
     <script src="poster-app.js?v=20260721-core-audit-v27"></script>
     <script src="reverse-analysis.js?v=20260717-reverse-analysis-contract-v1"></script>
     <script src="reverse-app.js?v=20260717-reverse-three-column-shell-v1"></script>
-    <script src="music-data.js?v=20260718-ambient-duration-v1"></script>
+    <script src="music-data.js?v=20260812-round2-version-v1"></script>
     <script src="music-adapters.js?v=20260718-ambient-duration-v1"></script>
-    <script src="music-app.js?v=20260812-takeover-state-sync-v1"></script>
+    <script src="music-app.js?v=20260812-round2-version-v1"></script>
     <script src="scene-assistant-data.js?v=20260723-director-analysis-v2"></script>
     <script src="screenplay-ai-analysis.js?v=20260811-quality-gate-v1"></script>
     <script src="screenplay-analysis-quality.js?v=20260811-quality-gate-v1"></script>
@@ -1416,7 +1427,7 @@
     <script src="workspace-core.js?v=20260811-asset-master-v1"></script>
     <script src="project-foundation.js?v=20260721-project-name-foundation-v2"></script>
     <script src="project-context.js?v=20260721-project-foundation-v1"></script>
-    <script src="project-dashboard.js?v=20260811-manual-project-modal-v1"></script>
+    <script src="project-dashboard.js?v=20260812-round2-dashboard-v1"></script>
   <script src="project-scenes.js?v=20260812-model-continuity-v1"></script>
     <script src="ui-motion.js?v=20260811-camera-workspace-title-v1"></script>
   </body>

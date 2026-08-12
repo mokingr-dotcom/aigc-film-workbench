@@ -816,26 +816,35 @@ html[data-active-workspace="projects"] .workspace-header.workspace-commandbar {
 
 #project-workspace .project-next-step {
   display: grid;
-  gap: 5px;
+  gap: 6px;
   margin-top: 20px;
-  padding: 14px 0 0 13px;
-  border-top: 1px solid var(--project-line);
-  border-left: 2px solid var(--project-error);
+  padding: 14px 16px 15px;
+  border: 1px solid color-mix(in srgb, var(--project-error) 28%, var(--project-line));
+  border-left: 3px solid var(--project-error);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--project-error) 5%, #fff);
 }
 
 #project-workspace .project-next-step > span {
   color: var(--project-error);
+  font-size: 10px;
+  font-weight: 720;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 #project-workspace .project-next-step strong {
-  font-size: 12px;
+  color: var(--project-ink, #1f2624);
+  font-size: 15px;
+  line-height: 1.25;
 }
 
 #project-workspace .project-next-step p {
+  max-width: 42em;
   margin: 0;
   color: var(--project-muted);
-  font-size: 10px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 #project-workspace :is(button, input, select, [role="option"]):focus-visible,

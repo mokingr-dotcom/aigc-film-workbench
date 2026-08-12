@@ -698,6 +698,137 @@ html[data-active-workspace="music"] .workspace-header :is(.command-trigger, .pro
   font-size: 12px;
 }
 
+#music-workspace .music-toolbar-actions .button.primary {
+  border-color: var(--music-primary);
+  background: var(--music-primary);
+  color: #fbfaf6;
+}
+
+#music-workspace .music-toolbar-actions .button.primary:hover:not(:disabled) {
+  border-color: #35463a;
+  background: #35463a;
+}
+
+#music-workspace .music-toolbar-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+#music-workspace .music-version-panel {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid var(--music-line);
+  background: #f0f1eb;
+}
+
+#music-workspace .music-version-panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+#music-workspace .music-version-panel-header span {
+  color: var(--music-primary);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+#music-workspace .music-version-panel-header h3 {
+  margin: 3px 0 0;
+  color: var(--music-ink);
+  font-family: Georgia, "Songti SC", "STSong", serif;
+  font-size: 16px;
+}
+
+#music-workspace .music-version-panel-header > strong {
+  color: var(--music-muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#music-workspace .music-version-empty {
+  margin: 0;
+  color: var(--music-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+#music-workspace .music-version-list {
+  display: grid;
+  gap: 8px;
+  max-height: 280px;
+  margin-top: 11px;
+  overflow-y: auto;
+}
+
+#music-workspace .music-version-card {
+  padding: 10px;
+  border: 1px solid var(--music-line);
+  background: #fffefa;
+}
+
+#music-workspace .music-version-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#music-workspace .music-version-card-header strong {
+  color: var(--music-ink);
+  font-size: 13px;
+}
+
+#music-workspace .music-version-card-header time {
+  color: var(--music-muted);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+#music-workspace .music-version-card p {
+  display: -webkit-box;
+  margin: 6px 0 8px;
+  overflow: hidden;
+  color: #5d5f58;
+  font-size: 11px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+#music-workspace .music-version-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+#music-workspace .music-version-card-footer small {
+  color: var(--music-primary);
+  font-size: 10px;
+}
+
+#music-workspace .music-version-card-footer button {
+  min-height: 28px;
+  padding: 4px 9px;
+  border: 1px solid var(--music-line-strong);
+  background: #fffefa;
+  color: var(--music-primary);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#music-workspace .music-version-card-footer button:hover {
+  border-color: var(--music-primary);
+  background: var(--music-primary-soft);
+}
+
 #music-workspace .music-column-resizer {
   position: relative;
   grid-row: 1;

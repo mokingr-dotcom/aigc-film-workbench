@@ -802,7 +802,7 @@ body.camera-column-resizing * {
 #camera-workspace .camera-composer {
   grid-area: composer;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 0;
   min-width: 0;
   min-height: 0;
@@ -824,6 +824,89 @@ body.camera-column-resizing * {
   padding: 9px 12px;
   border-bottom: 1px solid var(--camera-line);
   background: #fbfbf8;
+}
+
+#camera-workspace .camera-music-context {
+  margin: 10px 12px 0;
+  padding: 10px 11px;
+  border: 1px solid #d7e3dd;
+  border-left: 3px solid var(--camera-petrol);
+  background: #f4f8f5;
+}
+
+#camera-workspace .camera-music-context > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+#camera-workspace .camera-music-context > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+#camera-workspace .camera-music-context header span {
+  color: var(--camera-petrol);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+#camera-workspace .camera-music-context header strong {
+  color: var(--camera-ink);
+  font-size: 12px;
+}
+
+#camera-workspace .camera-music-context > header button {
+  flex: 0 0 auto;
+  min-height: 27px;
+  padding: 4px 8px;
+  border: 1px solid #bad0c7;
+  border-radius: 3px;
+  color: var(--camera-petrol);
+  background: #fff;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+#camera-workspace .camera-music-context > header button:hover {
+  border-color: var(--camera-petrol);
+  background: var(--camera-petrol-soft);
+}
+
+#camera-workspace .camera-music-context p {
+  margin: 7px 0 8px;
+  color: var(--camera-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+#camera-workspace .camera-music-context-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+#camera-workspace .camera-music-context-meta span {
+  padding: 3px 6px;
+  border: 1px solid #d7e3dd;
+  color: #45645a;
+  background: #fff;
+  font-size: 10px;
+}
+
+#camera-workspace .camera-music-context[data-state="empty"] {
+  border-left-color: var(--camera-amber);
+  border-color: #e5dbc4;
+  background: #fffaf1;
+}
+
+#camera-workspace .camera-music-context[data-state="empty"] header span,
+#camera-workspace .camera-music-context[data-state="empty"] header strong {
+  color: #8a6526;
 }
 
 #camera-workspace .camera-composer-scroll {
@@ -1014,7 +1097,11 @@ body.camera-column-resizing * {
   }
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 880px) {
+  #camera-workspace .camera-music-context {
+    margin: 8px 10px 0;
+  }
+
   #camera-workspace.camera-shell {
     grid-template-columns: 1fr;
     grid-template-areas: "stage" "library" "composer";

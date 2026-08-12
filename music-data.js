@@ -18,6 +18,7 @@
   };
 
   const MUSIC_SCHEMA_VERSION = 2;
+  const MUSIC_VERSION_LIMIT = 12;
   const DURATION_MODES = { preset: "常用时长", custom: "自定义时长", natural: "自然完整结束" };
   const DURATION_PRESETS = [15, 30, 60, 90, 120, 180, 300];
   const MUSIC_TARGETS = {
@@ -233,6 +234,7 @@
     ending: "保留自然尾音",
     extraRestrictions: "",
     favoriteTemplateIds: [],
+    versions: [],
     sceneZh: "",
     sceneEn: "",
     subjectState: "",
@@ -433,6 +435,22 @@
     return result;
   }
 
+  function normalizeMusicVersion(version, index) {
+    const raw = version && typeof version === "object" && !Array.isArray(version) ? version : {};
+    const musicState = raw.musicState && typeof raw.musicState === "object" && !Array.isArray(raw.musicState)
+      ? { ...raw.musicState, versions: [] }
+      : null;
+    return {
+      id: typeof raw.id === "string" && raw.id ? raw.id : `music-version-${index + 1}`,
+      number: Number.isInteger(raw.number) && raw.number > 0 ? raw.number : index + 1,
+      name: typeof raw.name === "string" && raw.name.trim() ? raw.name.trim() : `配乐方案 V${index + 1}`,
+      createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "",
+      targetModel: MUSIC_TARGETS[raw.targetModel] ? raw.targetModel : "generic",
+      prompt: typeof raw.prompt === "string" ? raw.prompt : "",
+      musicState
+    };
+  }
+
   function normalizeMusicState(input) {
     const state = cloneDefaultState();
     if (!input || typeof input !== "object" || Array.isArray(input)) return state;
@@ -471,6 +489,9 @@
       if (typeof source[key] === "string") state[key] = source[key];
     });
     if (Array.isArray(source.favoriteTemplateIds)) state.favoriteTemplateIds = unique(source.favoriteTemplateIds.filter((id) => MUSIC_TEMPLATES.some((template) => template.id === id)));
+    if (Array.isArray(source.versions)) {
+      state.versions = source.versions.map(normalizeMusicVersion).filter((version) => version.musicState).slice(0, MUSIC_VERSION_LIMIT);
+    }
     if (typeof source.advancedOpen === "boolean") state.advancedOpen = source.advancedOpen;
     state.emotionArc = normalizeNestedText(source.emotionArc, state.emotionArc, ["opening", "development", "climax", "ending"]);
     state.structure = normalizeNestedText(source.structure, state.structure, ["opening", "development", "climax", "ending"]);
@@ -657,6 +678,7 @@
 
   const api = {
     MUSIC_SCHEMA_VERSION,
+    MUSIC_VERSION_LIMIT,
     DURATION_MODES,
     DURATION_PRESETS,
     durationSecondsFromParts,
