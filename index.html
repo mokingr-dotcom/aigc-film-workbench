@@ -552,9 +552,18 @@
             </div>
           </details>
 
-          <details class="casting-inspector-group" id="casting-identity-details">
-            <summary>身份资料板内容</summary>
+          <details class="casting-inspector-group" id="casting-identity-details" open>
+            <summary>身份资料板与表演预设</summary>
             <div class="casting-fields">
+              <div class="field field-span-2 casting-performance-presets" style="display:grid; gap:6px; margin-bottom:4px;">
+                <span>导演级表演预设（一键填充表情与姿态）</span>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                  <button type="button" class="button secondary" data-casting-preset="anger" style="font-size:11px; padding:4px 8px;">克制愤怒</button>
+                  <button type="button" class="button secondary" data-casting-preset="sorrow" style="font-size:11px; padding:4px 8px;">隐忍悲伤</button>
+                  <button type="button" class="button secondary" data-casting-preset="tension" style="font-size:11px; padding:4px 8px;">高度警觉</button>
+                  <button type="button" class="button secondary" data-casting-preset="resolve" style="font-size:11px; padding:4px 8px;">冷静决绝</button>
+                </div>
+              </div>
               <label class="field field-span-2"><span>服装层级与材质</span><textarea id="casting-wardrobe" rows="2" placeholder="内层、外套、下装、鞋履、面料、颜色、磨损与穿着状态"></textarea></label>
               <label class="field field-span-2"><span>固定道具与佩戴位置</span><textarea id="casting-props" rows="2" placeholder="道具名称、材质、尺寸、使用痕迹、佩戴或携带位置"></textarea></label>
               <label class="field"><span>常态表情</span><input id="casting-neutral-expression" type="text" placeholder="克制中性，眼神专注，下颌轻微收紧"></label>

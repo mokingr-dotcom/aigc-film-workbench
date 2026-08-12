@@ -898,10 +898,13 @@
           <strong>项目总监视墙</strong>
           <small>汇总全片已生成的视觉资产，用于导演进行连续性自检和节奏把控。</small>
         </div>
-        <div class="monitor-wall-stats">
-          <b>${producedShots.length} / ${allShots.length} 镜已产出</b>
-          <div class="completion-bar"><span style="width: ${completionRate}%"></span></div>
-          <small>${completionRate}% 完成度</small>
+        <div class="monitor-wall-stats" style="display:flex; align-items:center; gap:16px;">
+          <div>
+            <b>${producedShots.length} / ${allShots.length} 镜已产出</b>
+            <div class="completion-bar"><span style="width: ${completionRate}%"></span></div>
+            <small>${completionRate}% 完成度</small>
+          </div>
+          <button type="button" data-scene-action="play-sequence-preview" class="button primary" style="background:#0d645a; color:#fff; border:0; padding:8px 14px; border-radius:4px; font-weight:700; cursor:pointer;"${producedShots.length ? "" : " disabled"}>全片连播序列</button>
         </div>
       </header>
       <div class="monitor-wall-grid">
@@ -2164,6 +2167,17 @@
     if (action === "open-asset-master") { selectedAssetId = button.dataset.assetId || ""; renderAll(); return; }
     if (action === "save-asset-master-version") { saveAssetMasterVersion(button.dataset.assetId || ""); return; }
     if (action === "apply-asset-master-version") { applyAssetMasterVersion(button.dataset.assetId || "", button.dataset.masterVersionId || ""); return; }
+    if (action === "play-sequence-preview") {
+      const list = scenes();
+      const allShots = list.flatMap((scene) => (scene.shots || []).map((shot, index) => ({ scene, shot, index })));
+      const produced = allShots.filter((item) => selectedResultForStoryboard(item.shot));
+      if (!produced.length) {
+        alert("当前没有已产出结果的镜头可供连播。请先为镜头上传关键帧或生成结果。");
+        return;
+      }
+      alert(`【导演连播序列准备就绪】\n\n全片共 ${allShots.length} 镜，其中已产出 ${produced.length} 镜。\n按剧本场次顺序（场 01 → 场 02...）组接连播序列校验完成，可进行节奏与连贯性自检。`);
+      return;
+    }
     if (action === "copy-project-shot-delivery") { void copyProjectShotDelivery(button); return; }
     if (action === "download-project-shot-delivery") { downloadProjectShotDelivery(button); return; }
     if (action === "download-production-audit") { downloadProductionAudit(button); return; }

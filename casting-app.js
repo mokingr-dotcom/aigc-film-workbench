@@ -1365,6 +1365,49 @@ ${value(elements.props, "[填写道具、材质、尺寸、使用痕迹和固定
   elements.clear.addEventListener("click", clearFields);
   elements.syncProject.addEventListener("click", syncToProject);
   elements.example.addEventListener("click", () => { void loadExample(); });
+
+  // 导演级表演预设快捷填充
+  const presetButtons = document.querySelectorAll("[data-casting-preset]");
+  const performancePresets = {
+    anger: {
+      neutralExpression: "下颌紧绷，双唇微抿，眼神克制而锐利",
+      expressionSet: "压抑的愤怒、隐忍、眼神死死锁定目标",
+      signatureAction: "手指微微收紧握拳、手臂肌肉瞬间绷紧",
+      stance: "身体前倾半步、重心压在前脚掌"
+    },
+    sorrow: {
+      neutralExpression: "眼眶微红，目光下垂，呼吸极其缓慢",
+      expressionSet: "隐忍的悲伤、疲惫、无声的叹息",
+      signatureAction: "抬手轻揉太阳穴或喉结微动吞咽",
+      stance: "双肩微塌、身体重心后撤、略显孤立"
+    },
+    tension: {
+      neutralExpression: "高度警觉，频繁且克制的眨眼，耳廓微动",
+      expressionSet: "警惕、突发危机前的凝固、高度专注",
+      signatureAction: "手掌贴近关键道具、头部微转观察四周",
+      stance: "随时准备启动的半蹲或戒备站姿"
+    },
+    resolve: {
+      neutralExpression: "冷静决绝，面部肌肉完全放松，眼神毫无波澜",
+      expressionSet: "坚定、视死如归的平静、冷酷清醒",
+      signatureAction: "扣上风衣纽扣或拉紧袖口、眼神冷峻直视前方",
+      stance: "脊背挺直、双脚稳稳扎根地面"
+    }
+  };
+
+  presetButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const type = btn.dataset.castingPreset;
+      const preset = performancePresets[type];
+      if (!preset) return;
+      if (elements.neutralExpression) elements.neutralExpression.value = preset.neutralExpression;
+      if (elements.expressionSet) elements.expressionSet.value = preset.expressionSet;
+      if (elements.signatureAction) elements.signatureAction.value = preset.signatureAction;
+      if (elements.stance) elements.stance.value = preset.stance;
+      state.copied = false;
+      render();
+    });
+  });
   elements.selectImage.addEventListener("click", () => { if (!state.assetBusy) elements.referenceFile.click(); });
   elements.replaceImage.addEventListener("click", () => { if (!state.assetBusy) elements.referenceFile.click(); });
   elements.removeImage.addEventListener("click", () => { void clearReferenceAsset(); });
